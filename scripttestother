@@ -3187,18 +3187,129 @@ function tjsw()
 end
 
 function qcbf()
-    local uin = AccountManager:getUin()
-    if not uin then
-        ShowGameTipsWithoutFilter("#cff0000Không lấy được UIN người chơi")
-        return
-    end
-    local tdata = {
-        [1] = "buff",
-        [2] = "clearAllBuff",
-        [3] = { uin }
-    }
-    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-    ShowGameTipsWithoutFilter("#c00ff00[Moon] Đã xóa toàn bộ buff!")
+
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "Do you want to make the orbit?",
+        "CANCEL",
+        "CONFIRM",
+        function(userData, btnType)
+
+            if btnType == 0 then
+
+                _G.qcbf_enabled = false
+                _G.qcbf_generation =
+                    (_G.qcbf_generation or 0) + 1
+
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000Orbit stopped"
+                )
+
+            elseif btnType == 1 then
+
+                ShowGameTipsWithoutFilter(
+                    "Enter Image id"
+                )
+
+                ShowTextInputSafe(function(imageText)
+
+                    local imageId = tonumber(imageText)
+
+                    if not imageId then
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000Invalid image id"
+                        )
+                        return
+                    end
+
+                    _G.qcbf_enabled = false
+                    _G.qcbf_generation =
+                        (_G.qcbf_generation or 0) + 1
+
+                    _G.qcbf_enabled = true
+
+                    local generation =
+                        _G.qcbf_generation
+
+                    threadpool:work(function()
+
+                        local uin =
+                            AccountManager:getUin()
+
+                        if not uin then
+                            _G.qcbf_enabled = false
+                            return
+                        end
+
+                        local radius = 80
+                        local count = 7
+
+                        while _G.qcbf_enabled
+                        and generation ==
+                            _G.qcbf_generation do
+
+                            local angleStep =
+                                (math.pi * 2) / count
+
+                            for i = 1, count do
+
+                                local angle =
+                                    (i - 1) * angleStep
+
+                                local x =
+                                    math.cos(angle) *
+                                    radius
+
+                                local z =
+                                    math.sin(angle) *
+                                    radius
+
+                                local tdata = {
+                                    [1] = "graphics",
+                                    [2] =
+                                        "createGraphicsImageByActor",
+                                    [3] = {
+                                        uin,
+                                        {
+                                            imgid = imageId,
+                                            scale = 0.7,
+                                            apha = 90,
+                                            id = i,
+                                            Type =
+                                                'GRAPHICS.GRAPHICS_IMAGE'
+                                        },
+                                        {
+                                            x = x,
+                                            y = 160,
+                                            z = z
+                                        },
+                                        1,
+                                        0,
+                                        150
+                                    }
+                                }
+
+                                pcall(function()
+
+                                    ScriptSupportTask:reportTaskToHost(
+                                        SSTASKID.HOST_BordCast,
+                                        tdata
+                                    )
+
+                                end)
+                            end
+
+                            threadpool:wait(0.05)
+                        end
+                    end)
+
+                    ShowGameTipsWithoutFilter(
+                        "#c00FF00Orbit enabled"
+                    )
+
+                end)
+            end
+        end
+    )
 end
 
 
@@ -8140,7 +8251,7 @@ function UI:Init()
         items = {
             { name = "Cấm chat người chơi", func = jywj },
             { name = "Thú cưỡi nhanh", func = kjzq },
-            { name = "Xóa buff", func = qcbf },
+            { name = "圍繞玩家（圖示）運行", func = qcbf },
             { name = "Cày huy chương", func = sqxz },
             { name = "Thần uy giáng xuống", func = tjsw },
             { name = "Phát hiệu ứng âm thanh", func = bfyx },

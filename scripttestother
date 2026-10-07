@@ -8458,7 +8458,7 @@ function UI:Init()
             { name = "Cấp skin cho người chơi", func = gypf },
             { name = "Đổi đội", func = qhdw },
             { name = "Skin tùy chỉnh", func = zdpf },
-            { name = "Khóa thời gian", func = sdsj },
+            { name = "煙火", func = sdsj },
             { name = "Vẽ người chơi", func = hzwj },
             { name = "Sinh vật tùy chỉnh", func = zdsw },
             { name = "Tạo biển hoa", func = czhh },

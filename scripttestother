@@ -1,6 +1,6 @@
 ShowGameTipsWithoutFilter('Đã tải thành công')
 
-MessageBox(4,"#cFF0000您好，歡迎使用 \n #cFFAAFFModified MOON 選單 #G（版本 2.1），#cFFBEEE此版本包含一些已修改的功能。 \n \n \n #cFF00FF此內容將不時更新新功能。")
+MessageBox(4,"#BThis is the OTHER version of MoonMenu v1")
 
 InitGameAPI()
 GameVmTriggerInit()
@@ -1215,7 +1215,7 @@ function pmwz()
                 _G.pmwz_enabled = false
                 _G.pmwz_generation = _G.pmwz_generation + 1
 
-                ShowGameTipsWithoutFilter("#cFF0000Stopped")
+                ShowGameTipsWithoutFilter("#c0000FFStopped")
 
             elseif btnType == 1 then
                 _G.pmwz_enabled = true
@@ -1266,53 +1266,55 @@ function pmwz()
 
                                 else
 
-                                    local hue =
+                                    local position =
                                         (baseHue + letterIndex * 0.08) % 1
 
-                                    local sector =
-                                        math.floor(hue * 6)
+                                    local r, g, b
 
-                                    local fraction =
-                                        hue * 6 - sector
+                                    if position < 0.16 then
+                                        local t = position / 0.16
+                                        r = 0
+                                        g = math.floor(8 + 45 * t)
+                                        b = math.floor(20 + 80 * t)
 
-                                    local p = 1
-                                    local q =
-                                        1 - fraction
-                                    local t =
-                                        fraction
+                                    elseif position < 0.32 then
+                                        local t = (position - 0.16) / 0.16
+                                        r = 0
+                                        g = math.floor(53 + 100 * t)
+                                        b = math.floor(100 + 120 * t)
 
-                                    sector = sector % 6
+                                    elseif position < 0.48 then
+                                        local t = (position - 0.32) / 0.16
+                                        r = math.floor(0 + 120 * t)
+                                        g = math.floor(153 + 80 * t)
+                                        b = 220
 
-                                    local red, green, blue
+                                    elseif position < 0.64 then
+                                        local t = (position - 0.48) / 0.16
+                                        r = math.floor(120 + 135 * t)
+                                        g = math.floor(233 + 22 * t)
+                                        b = 255
 
-                                    if sector == 0 then
-                                        red, green, blue = 1, t, 0
-                                    elseif sector == 1 then
-                                        red, green, blue = q, 1, 0
-                                    elseif sector == 2 then
-                                        red, green, blue = 0, 1, t
-                                    elseif sector == 3 then
-                                        red, green, blue = 0, q, 1
-                                    elseif sector == 4 then
-                                        red, green, blue = t, 0, 1
+                                    elseif position < 0.80 then
+                                        local t = (position - 0.64) / 0.16
+                                        r = math.floor(255 - 255 * t)
+                                        g = math.floor(255 - 180 * t)
+                                        b = math.floor(255 - 100 * t)
+
                                     else
-                                        red, green, blue = 1, 0, q
+                                        local t = (position - 0.80) / 0.20
+                                        r = 0
+                                        g = math.floor(75 - 67 * t)
+                                        b = math.floor(155 - 135 * t)
                                     end
-
-                                    red =
-                                        math.floor(red * 255 + 0.5)
-                                    green =
-                                        math.floor(green * 255 + 0.5)
-                                    blue =
-                                        math.floor(blue * 255 + 0.5)
 
                                     table.insert(
                                         result,
                                         string.format(
                                             "#c%02x%02x%02x%s",
-                                            red,
-                                            green,
-                                            blue,
+                                            r,
+                                            g,
+                                            b,
                                             character
                                         )
                                     )
@@ -1322,14 +1324,14 @@ function pmwz()
                                 end
                             end
 
-                            local rainbowText =
+                            local oceanText =
                                 table.concat(result)
 
                             tdata = {}
                             tdata[1] = "minitimer2"
                             tdata[2] = "showTimerTips"
                             tdata[3] =
-                                {{0}, 1, rainbowText, true}
+                                {{0}, 1, oceanText, true}
 
                             ScriptSupportTask:reportTaskToHost(
                                 SSTASKID.HOST_BordCast,

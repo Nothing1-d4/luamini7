@@ -1105,19 +1105,214 @@ end
 end
 
 function sdsj()
-    ShowTextInputSafe(function(text)
-        local value = tonumber(text)
-        if not value then
-            ShowGameTipsWithoutFilter("Hãy nhập số hợp lệ (giá trị thời gian)")
-            return
+
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "Do you want to make the firework?",
+        "CANCEL",
+        "CONFIRM",
+        function(userData, btnType)
+
+            if btnType == 0 then
+
+                _G.qcbf_enabled = false
+                _G.qcbf_generation =
+                    (_G.qcbf_generation or 0) + 1
+
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000Firework stopped"
+                )
+
+            elseif btnType == 1 then
+
+                ShowGameTipsWithoutFilter(
+                    "Enter Image id"
+                )
+
+                ShowTextInputSafe(function(imageText)
+
+                    local imageId = tonumber(imageText)
+
+                    if not imageId then
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000Invalid image id"
+                        )
+                        return
+                    end
+
+                    ShowGameTipsWithoutFilter(
+                        "Enter Number of Icons (1-100)"
+                    )
+
+                    ShowTextInputSafe(function(countText)
+
+                        local count = tonumber(countText)
+
+                        if not count then
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Invalid number"
+                            )
+                            return
+                        end
+
+                        count = math.floor(count)
+
+                        if count < 1 then
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Number must be at least 1"
+                            )
+                            return
+                        end
+
+                        if count > 100 then
+                            count = 100
+                        end
+
+                        _G.qcbf_enabled = false
+                        _G.qcbf_generation =
+                            (_G.qcbf_generation or 0) + 1
+
+                        _G.qcbf_enabled = true
+
+                        local generation =
+                            _G.qcbf_generation
+
+                        threadpool:work(function()
+
+                            local uin =
+                                AccountManager:getUin()
+
+                            if not uin then
+                                _G.qcbf_enabled = false
+                                return
+                            end
+
+                            local startRadius = 100
+                            local maxRadius = 2000
+                            local centerY = -100
+
+                            local directions = {}
+
+                            math.randomseed(
+                                os.time()
+                            )
+
+                            for i = 1, count do
+
+                                local theta =
+                                    math.random() *
+                                    math.pi * 2
+
+                                local phi =
+                                    math.acos(
+                                        (math.random() * 2) - 1
+                                    )
+
+                                local sinPhi =
+                                    math.sin(phi)
+
+                                directions[i] = {
+                                    x =
+                                        sinPhi *
+                                        math.cos(theta),
+
+                                    y =
+                                        math.cos(phi),
+
+                                    z =
+                                        sinPhi *
+                                        math.sin(theta)
+                                }
+                            end
+
+                            local radius =
+                                startRadius
+
+                            while _G.qcbf_enabled
+                            and generation ==
+                                _G.qcbf_generation do
+
+                                for i = 1, count do
+
+                                    local dir =
+                                        directions[i]
+
+                                    local x =
+                                        dir.x *
+                                        radius
+
+                                    local y =
+                                        centerY +
+                                        dir.y *
+                                        radius
+
+                                    local z =
+                                        dir.z *
+                                        radius
+
+                                    local tdata = {
+                                        [1] = "graphics",
+                                        [2] =
+                                            "createGraphicsImageByActor",
+                                        [3] = {
+                                            uin,
+                                            {
+                                                imgid =
+                                                    imageId,
+
+                                                scale =
+                                                    0.7,
+
+                                                apha =
+                                                    90,
+
+                                                id =
+                                                    1000 + i,
+
+                                                Type =
+                                                    'GRAPHICS.GRAPHICS_IMAGE'
+                                            },
+                                            {
+                                                x = x,
+                                                y = y,
+                                                z = z
+                                            },
+                                            1,
+                                            0,
+                                            150
+                                        }
+                                    }
+
+                                    pcall(function()
+
+                                        ScriptSupportTask:reportTaskToHost(
+                                            SSTASKID.HOST_BordCast,
+                                            tdata
+                                        )
+
+                                    end)
+                                end
+
+                                radius =
+                                    radius + 50
+
+                                if radius >= maxRadius then
+                                    radius =
+                                        startRadius
+                                end
+
+                                threadpool:wait(0.05)
+                            end
+                        end)
+
+                        ShowGameTipsWithoutFilter(
+                            "#c00FF00Firework enabled"
+                        )
+
+                    end)
+                end)
+            end
         end
-        local tdata = {
-            [1] = "gamerule",
-            [2] = "setTimLocked",
-            [3] = { value }
-        }
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-    end)
+    )
 end
 
 -- 待机动作

@@ -3595,64 +3595,282 @@ for i = 1, size do
 
 -- ==================== 复杂功能函数 ====================
 function fsjg()
-GetInst("MiniUIManager"):CloseUI("main_songbookAutoGen")
--- 炸图模拟器功能（左边停止，右边开启）
-GetInst("MessageBoxInterface"):dualBtnBox(
-    "Bên trái dừng laser\nBên phải bật laser",  -- 消息内容
-    "Đóng",        -- 标题
-    nil,                  -- 图标
-    function(userData, btnType)
-        if btnType == 0 then  -- 左边按钮：停止
-            _G.ztmn_enabled = false
-            ShowGameTipsWithoutFilter("#cFF0000Laser đã dừng")
-            
-        elseif btnType == 1 then  -- 右边按钮：开启
-            _G.ztmn_enabled = true
-            ShowGameTipsWithoutFilter("#c00ffffLaser đã bật - từ mọi hướng")
-            
-            -- 启动炸图循环
-            threadpool:work(function()
-                while _G.ztmn_enabled do
-                    -- 获取自己当前位置
-                    local my_x, my_y, my_z = CurMainPlayer:getPosition(0, 0, 0)
-                    local center_x = my_x / 100
-                    local center_y = my_y / 100
-                    local center_z = my_z / 100
-                    
-                    -- 向四面八方发射（8个方向）
-                    for angle = 0, 315, 45 do  -- 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°
-                        local rad = math.rad(angle)  -- 角度转弧度
-                        
-                        -- 计算目标位置（距离50-100格）
-                        local distance = math.random(50, 100)
-                        local target_x = center_x + math.cos(rad) * distance
-                        local target_z = center_z + math.sin(rad) * distance
-                        local target_y = center_y
-                        
-                        -- 发射投掷物（从自己位置射向目标）
-                        local tdata = {
-                            [1] = "world",
-                            [2] = "spawnProjectile",
+
+    _G.rgbTitle_enabled = false
+    _G.rgbTitle_generation =
+        (_G.rgbTitle_generation or 0) + 1
+
+    ShowGameTipsWithoutFilter(
+        "Enter text"
+    )
+
+    ShowTextInputSafe(function(text)
+
+        if not text or text == "" then
+            ShowGameTipsWithoutFilter(
+                "#cFF0000No text entered"
+            )
+            return
+        end
+
+        ShowGameTipsWithoutFilter(
+            "Select Colour 1O 2F 3R 4S"
+        )
+
+        ShowTextInputSafe(function(modeText)
+
+            local mode = tonumber(modeText)
+
+            if mode ~= 1
+            and mode ~= 2
+            and mode ~= 3
+            and mode ~= 4 then
+
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000Invalid colour mode"
+                )
+                return
+            end
+
+            ShowGameTipsWithoutFilter(
+                "Enter Image id"
+            )
+
+            ShowTextInputSafe(function(imageText)
+
+                local imageId = tonumber(imageText)
+
+                if not imageId then
+                    ShowGameTipsWithoutFilter(
+                        "#cFF0000Invalid image id"
+                    )
+                    return
+                end
+
+                _G.rgbTitle_enabled = true
+                _G.rgbTitle_generation =
+                    _G.rgbTitle_generation + 1
+
+                local generation =
+                    _G.rgbTitle_generation
+
+                threadpool:work(function()
+
+                    local uin =
+                        AccountManager:getUin()
+
+                    if not uin then
+                        _G.rgbTitle_enabled = false
+                        return
+                    end
+
+                    local function splitUtf8(text)
+
+                        local chars = {}
+
+                        for character in string.gmatch(
+                            text,
+                            "[%z\1-\127\194-\244][\128-\191]*"
+                        ) do
+                            table.insert(chars, character)
+                        end
+
+                        return chars
+                    end
+
+                    local function hsvToRgb(h, s, v)
+
+                        local i = math.floor(h * 6)
+                        local f = h * 6 - i
+                        local p = v * (1 - s)
+                        local q = v * (1 - f * s)
+                        local t = v * (1 - (1 - f) * s)
+
+                        i = i % 6
+
+                        if i == 0 then
+                            return v, t, p
+                        elseif i == 1 then
+                            return q, v, p
+                        elseif i == 2 then
+                            return p, v, t
+                        elseif i == 3 then
+                            return p, q, v
+                        elseif i == 4 then
+                            return t, p, v
+                        else
+                            return v, p, q
+                        end
+                    end
+
+                    local function rgbToHex(r, g, b)
+
+                        return string.format(
+                            "#c%02x%02x%02x",
+                            math.floor(r * 255 + 0.5),
+                            math.floor(g * 255 + 0.5),
+                            math.floor(b * 255 + 0.5)
+                        )
+                    end
+
+                    local characters =
+                        splitUtf8(text)
+
+                    local offset = 0
+
+                    while _G.rgbTitle_enabled
+                    and generation == _G.rgbTitle_generation do
+
+                        local result = {}
+
+                        for i, character in ipairs(characters) do
+
+                            local hue
+
+                            if mode == 1 then
+
+                                hue =
+                                    0.48
+                                    + math.sin(
+                                        offset +
+                                        (i - 1) * 0.45
+                                    ) * 0.08
+
+                            elseif mode == 2 then
+
+                                hue =
+                                    0.02
+                                    + math.sin(
+                                        offset +
+                                        (i - 1) * 0.45
+                                    ) * 0.04
+
+                            elseif mode == 3 then
+
+                                hue =
+                                    (
+                                        offset +
+                                        (i - 1) * 0.08
+                                    ) % 1
+
+                            else
+
+                                hue =
+                                    0.91
+                                    + math.sin(
+                                        offset +
+                                        (i - 1) * 0.45
+                                    ) * 0.035
+                            end
+
+                            local saturation
+                            local value = 1.0
+
+                            if mode == 1 then
+                                saturation = 0.75
+                            elseif mode == 2 then
+                                saturation = 0.95
+                            elseif mode == 3 then
+                                saturation = 0.75
+                            else
+                                saturation = 0.45
+                            end
+
+                            local r, g, b =
+                                hsvToRgb(
+                                    hue % 1,
+                                    saturation,
+                                    value
+                                )
+
+                            table.insert(
+                                result,
+                                rgbToHex(r, g, b)
+                                .. character
+                            )
+                        end
+
+                        local coloredTitle =
+                            table.concat(result)
+
+                        local tdata1 = {
+                            [1] = "graphics",
+                            [2] =
+                                "createGraphicsTxtByActor",
                             [3] = {
-                                AccountManager:getUin(),
-                                15509,  -- 火龙果ID
-                                center_x, center_y + 2, center_z,  -- 发射位置（自己位置稍微抬高）
-                                target_x, target_y, target_z,       -- 目标位置
-                                500
+                                uin,
+                                {
+                                    title = coloredTitle,
+                                    fontsize = 20,
+                                    apha = 5,
+                                    itype = 2,
+                                    Type =
+                                        'GRAPHICS.GRAPHICS_HORNBOOK'
+                                },
+                                {
+                                    x = 0,
+                                    y = 160,
+                                    z = 0
+                                },
+                                1.2,
+                                0,
+                                115
                             }
                         }
-                        
-                        pcall(function() 
-                            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata) 
+
+                        local tdata2 = {
+                            [1] = "graphics",
+                            [2] =
+                                "createGraphicsImageByActor",
+                            [3] = {
+                                uin,
+                                {
+                                    imgid = imageId,
+                                    scale = 0.7,
+                                    apha = 90,
+                                    id = 1,
+                                    Type =
+                                        'GRAPHICS.GRAPHICS_IMAGE'
+                                },
+                                {
+                                    x = 0,
+                                    y = 50,
+                                    z = 0
+                                },
+                                1,
+                                0,
+                                150
+                            }
+                        }
+
+                        pcall(function()
+
+                            ScriptSupportTask:reportTaskToHost(
+                                SSTASKID.HOST_BordCast,
+                                tdata1
+                            )
+
+                            ScriptSupportTask:reportTaskToHost(
+                                SSTASKID.HOST_BordCast,
+                                tdata2
+                            )
+
                         end)
+
+                        offset =
+                            offset + 0.10
+
+                        threadpool:wait(0.08)
                     end
-                    
-                    threadpool:wait(0.2)  -- 0.2秒发射一轮
-                end
+                end)
+
+                ShowGameTipsWithoutFilter(
+                    "#c00FF00RGB title enabled"
+                )
+
             end)
-        end
-    end
-)
+        end)
+    end)
 end
 
 
@@ -7893,7 +8111,7 @@ function UI:Init()
             { name = "Cày huy chương", func = sqxz },
             { name = "Thần uy giáng xuống", func = tjsw },
             { name = "Phát hiệu ứng âm thanh", func = bfyx },
-            { name = "Bắn laser", func = fsjg },
+            { name = "每個自訂文本", func = fsjg },
             { name = "Lưu điểm hồi sinh người chơi", func = bcfhd },
             { name = "Cấp skin cho người chơi", func = gypf },
             { name = "Đổi đội", func = qhdw },

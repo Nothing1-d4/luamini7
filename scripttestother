@@ -3240,27 +3240,27 @@ function qcbf()
                             return
                         end
 
-                        local radius = 80
+                        local radius = 220
                         local count = 7
+                        local angle = 0
 
                         while _G.qcbf_enabled
                         and generation ==
                             _G.qcbf_generation do
 
-                            local angleStep =
-                                (math.pi * 2) / count
-
                             for i = 1, count do
 
-                                local angle =
-                                    (i - 1) * angleStep
+                                local currentAngle =
+                                    angle +
+                                    ((i - 1) *
+                                    ((math.pi * 2) / count))
 
                                 local x =
-                                    math.cos(angle) *
+                                    math.cos(currentAngle) *
                                     radius
 
                                 local z =
-                                    math.sin(angle) *
+                                    math.sin(currentAngle) *
                                     radius
 
                                 local tdata = {
@@ -3279,7 +3279,7 @@ function qcbf()
                                         },
                                         {
                                             x = x,
-                                            y = 160,
+                                            y = 80,
                                             z = z
                                         },
                                         1,
@@ -3297,6 +3297,9 @@ function qcbf()
 
                                 end)
                             end
+
+                            angle =
+                                angle + 0.10
 
                             threadpool:wait(0.05)
                         end

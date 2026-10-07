@@ -3273,13 +3273,13 @@ function qcbf()
                                             imgid = imageId,
                                             scale = 0.7,
                                             apha = 90,
-                                            id = i,
+                                            id = 101 + i,
                                             Type =
                                                 'GRAPHICS.GRAPHICS_IMAGE'
                                         },
                                         {
                                             x = x,
-                                            y = 80,
+                                            y = 5,
                                             z = z
                                         },
                                         1,

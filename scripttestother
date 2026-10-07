@@ -1776,25 +1776,169 @@ else
     ShowGameTipsWithoutFilter("#cFF0000Không thể lấy vị trí tâm ngắm")
 end
 end
+
 function qtxk()
-if ClientCurGame:isInGame() and CurWorld and CurWorld:getOWID() and AccountManager:getMultiPlayer() > 0 then
-            local num = ClientCurGame:getNumPlayerBriefInfo()
-            for i = 1, num do
-                local briefInfo = ClientCurGame:getPlayerBriefInfo(i-1)
-                if briefInfo and briefInfo.uin and briefInfo.uin > 1000 then
-                    local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-                    local new_x = x / 100
-                    local new_y = y / 100
-                    local new_z = z / 100
-                    tdata = {}
-                    tdata[1] = "player";
-                    tdata[2] = "setPosition";
-                    tdata[3] = {briefInfo.uin,new_x,-99,new_z}
-                    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)   
-                end
+
+    _G.shenZhiTianShi_enabled = false
+    _G.shenZhiTianShi_generation =
+        (_G.shenZhiTianShi_generation or 0) + 1
+
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "（神之）天使\n\n开启或关闭头顶称号",
+        "关闭",
+        "开启",
+        function(userData, btnType)
+
+            if btnType == 0 then
+
+                _G.shenZhiTianShi_enabled = false
+                _G.shenZhiTianShi_generation =
+                    _G.shenZhiTianShi_generation + 1
+
+                ShowGameTipsWithoutFilter(
+                    "#cFF88CC已关闭"
+                )
+
+            elseif btnType == 1 then
+
+                _G.shenZhiTianShi_enabled = true
+                _G.shenZhiTianShi_generation =
+                    _G.shenZhiTianShi_generation + 1
+
+                local generation =
+                    _G.shenZhiTianShi_generation
+
+                threadpool:work(function()
+
+                    if not ClientCurGame
+                    or not ClientCurGame:isInGame() then
+
+                        ShowGameTipsWithoutFilter(
+                            "#cFF7AADHãy vào phòng trước"
+                        )
+
+                        _G.shenZhiTianShi_enabled = false
+                        return
+                    end
+
+                    local uin = AccountManager:getUin()
+
+                    if not uin then
+
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000Không lấy được UIN người chơi"
+                        )
+
+                        _G.shenZhiTianShi_enabled = false
+                        return
+                    end
+
+                    local colors = {
+                        "#cFFB6D9",
+                        "#cFFA8CBE",
+                        "#cFFFFCFF",
+                        "#cFFFFB7D",
+                        "#cFFFF8F0",
+                        "#cFFFFDDF"
+                    }
+
+                    local index = 1
+
+                    while _G.shenZhiTianShi_enabled
+                    and generation == _G.shenZhiTianShi_generation do
+
+                        local color = colors[index]
+
+                        local tdata1 = {
+                            [1] = "graphics",
+                            [2] = "createGraphicsTxtByActor",
+                            [3] = {
+                                uin,
+                                {
+                                    title =
+                                        color ..
+                                        "（神之）天使",
+                                    fontsize = 20,
+                                    apha = 5,
+                                    itype = 2,
+                                    Type =
+                                        'GRAPHICS.GRAPHICS_HORNBOOK'
+                                },
+                                {
+                                    x = 0,
+                                    y = 160,
+                                    z = 0
+                                },
+                                1.2,
+                                0,
+                                115
+                            }
+                        }
+
+                        local tdata2 = {
+                            [1] = "graphics",
+                            [2] = "createGraphicsImageByActor",
+                            [3] = {
+                                uin,
+                                {
+                                    imgid = 10099,
+                                    scale = 0.7,
+                                    apha = 90,
+                                    id = 1,
+                                    Type =
+                                        'GRAPHICS.GRAPHICS_IMAGE'
+                                },
+                                {
+                                    x = 0,
+                                    y = 50,
+                                    z = 0
+                                },
+                                1,
+                                0,
+                                150
+                            }
+                        }
+
+                        local ok, err = pcall(function()
+
+                            ScriptSupportTask:reportTaskToHost(
+                                SSTASKID.HOST_BordCast,
+                                tdata1
+                            )
+
+                            ScriptSupportTask:reportTaskToHost(
+                                SSTASKID.HOST_BordCast,
+                                tdata2
+                            )
+
+                        end)
+
+                        if not ok then
+
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Lỗi tạo icon: "
+                                .. tostring(err)
+                            )
+
+                        end
+
+                        index = index + 1
+
+                        if index > #colors then
+                            index = 1
+                        end
+
+                        threadpool:wait(0.3)
+                    end
+                end)
+
+                ShowGameTipsWithoutFilter(
+                    "#cFF88CC（神之）天使 已开启"
+                )
             end
         end
-        end
+    )
+end
 
 
 function yfgb()
@@ -7655,7 +7799,7 @@ function UI:Init()
         accentColor = { r = 0.96, g = 0.62, b = 0.04, a = 1.0 },
         items = {
             { name = "關閉房間並擊殺玩家", func = yfgb },
-            { name = "Ném cả nhóm vào hư không", func = qtxk },
+            { name = "绚丽的粉色~", func = qtxk },
             { name = "Tâm ngắm phá khối", func = zxph },
             { name = "Tâm ngắm điều khiển người chơi", func = zxkz },
             { name = "Tâm ngắm cấp hiệu ứng", func = zxsw },

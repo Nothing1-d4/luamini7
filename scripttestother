@@ -3596,281 +3596,314 @@ for i = 1, size do
 -- ==================== 复杂功能函数 ====================
 function fsjg()
 
-    _G.rgbTitle_enabled = false
-    _G.rgbTitle_generation =
-        (_G.rgbTitle_generation or 0) + 1
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "Do you want to start or stop this?",
+        "CANCEL",
+        "CONFIRM",
+        function(userData, btnType)
 
-    ShowGameTipsWithoutFilter(
-        "Enter text"
-    )
+            if btnType == 0 then
 
-    ShowTextInputSafe(function(text)
-
-        if not text or text == "" then
-            ShowGameTipsWithoutFilter(
-                "#cFF0000No text entered"
-            )
-            return
-        end
-
-        ShowGameTipsWithoutFilter(
-            "Select Colour 1O 2F 3R 4S"
-        )
-
-        ShowTextInputSafe(function(modeText)
-
-            local mode = tonumber(modeText)
-
-            if mode ~= 1
-            and mode ~= 2
-            and mode ~= 3
-            and mode ~= 4 then
+                _G.rgbTitle_enabled = false
+                _G.rgbTitle_generation =
+                    (_G.rgbTitle_generation or 0) + 1
 
                 ShowGameTipsWithoutFilter(
-                    "#cFF0000Invalid colour mode"
+                    "#cFF0000RGB title stopped"
                 )
-                return
-            end
 
-            ShowGameTipsWithoutFilter(
-                "Enter Image id"
-            )
+            elseif btnType == 1 then
 
-            ShowTextInputSafe(function(imageText)
-
-                local imageId = tonumber(imageText)
-
-                if not imageId then
-                    ShowGameTipsWithoutFilter(
-                        "#cFF0000Invalid image id"
-                    )
-                    return
-                end
-
-                _G.rgbTitle_enabled = true
+                _G.rgbTitle_enabled = false
                 _G.rgbTitle_generation =
-                    _G.rgbTitle_generation + 1
+                    (_G.rgbTitle_generation or 0) + 1
 
-                local generation =
-                    _G.rgbTitle_generation
+                ShowGameTipsWithoutFilter(
+                    "Enter text"
+                )
 
-                threadpool:work(function()
+                ShowTextInputSafe(function(text)
 
-                    local uin =
-                        AccountManager:getUin()
-
-                    if not uin then
-                        _G.rgbTitle_enabled = false
+                    if not text or text == "" then
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000No text entered"
+                        )
                         return
                     end
 
-                    local function splitUtf8(text)
+                    ShowGameTipsWithoutFilter(
+                        "Select Colour 1O 2F 3R 4S"
+                    )
 
-                        local chars = {}
+                    ShowTextInputSafe(function(modeText)
 
-                        for character in string.gmatch(
-                            text,
-                            "[%z\1-\127\194-\244][\128-\191]*"
-                        ) do
-                            table.insert(chars, character)
+                        local mode = tonumber(modeText)
+
+                        if mode ~= 1
+                        and mode ~= 2
+                        and mode ~= 3
+                        and mode ~= 4 then
+
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Invalid colour mode"
+                            )
+                            return
                         end
 
-                        return chars
-                    end
-
-                    local function hsvToRgb(h, s, v)
-
-                        local i = math.floor(h * 6)
-                        local f = h * 6 - i
-                        local p = v * (1 - s)
-                        local q = v * (1 - f * s)
-                        local t = v * (1 - (1 - f) * s)
-
-                        i = i % 6
-
-                        if i == 0 then
-                            return v, t, p
-                        elseif i == 1 then
-                            return q, v, p
-                        elseif i == 2 then
-                            return p, v, t
-                        elseif i == 3 then
-                            return p, q, v
-                        elseif i == 4 then
-                            return t, p, v
-                        else
-                            return v, p, q
-                        end
-                    end
-
-                    local function rgbToHex(r, g, b)
-
-                        return string.format(
-                            "#c%02x%02x%02x",
-                            math.floor(r * 255 + 0.5),
-                            math.floor(g * 255 + 0.5),
-                            math.floor(b * 255 + 0.5)
+                        ShowGameTipsWithoutFilter(
+                            "Enter Image id"
                         )
-                    end
 
-                    local characters =
-                        splitUtf8(text)
+                        ShowTextInputSafe(function(imageText)
 
-                    local offset = 0
+                            local imageId = tonumber(imageText)
 
-                    while _G.rgbTitle_enabled
-                    and generation == _G.rgbTitle_generation do
-
-                        local result = {}
-
-                        for i, character in ipairs(characters) do
-
-                            local hue
-
-                            if mode == 1 then
-
-                                hue =
-                                    0.48
-                                    + math.sin(
-                                        offset +
-                                        (i - 1) * 0.45
-                                    ) * 0.08
-
-                            elseif mode == 2 then
-
-                                hue =
-                                    0.02
-                                    + math.sin(
-                                        offset +
-                                        (i - 1) * 0.45
-                                    ) * 0.04
-
-                            elseif mode == 3 then
-
-                                hue =
-                                    (
-                                        offset +
-                                        (i - 1) * 0.08
-                                    ) % 1
-
-                            else
-
-                                hue =
-                                    0.91
-                                    + math.sin(
-                                        offset +
-                                        (i - 1) * 0.45
-                                    ) * 0.035
-                            end
-
-                            local saturation
-                            local value = 1.0
-
-                            if mode == 1 then
-                                saturation = 0.75
-                            elseif mode == 2 then
-                                saturation = 0.95
-                            elseif mode == 3 then
-                                saturation = 0.75
-                            else
-                                saturation = 0.45
-                            end
-
-                            local r, g, b =
-                                hsvToRgb(
-                                    hue % 1,
-                                    saturation,
-                                    value
+                            if not imageId then
+                                ShowGameTipsWithoutFilter(
+                                    "#cFF0000Invalid image id"
                                 )
+                                return
+                            end
 
-                            table.insert(
-                                result,
-                                rgbToHex(r, g, b)
-                                .. character
-                            )
-                        end
+                            _G.rgbTitle_enabled = true
+                            _G.rgbTitle_generation =
+                                _G.rgbTitle_generation + 1
 
-                        local coloredTitle =
-                            table.concat(result)
+                            local generation =
+                                _G.rgbTitle_generation
 
-                        local tdata1 = {
-                            [1] = "graphics",
-                            [2] =
-                                "createGraphicsTxtByActor",
-                            [3] = {
-                                uin,
-                                {
-                                    title = coloredTitle,
-                                    fontsize = 20,
-                                    apha = 5,
-                                    itype = 2,
-                                    Type =
-                                        'GRAPHICS.GRAPHICS_HORNBOOK'
-                                },
-                                {
-                                    x = 0,
-                                    y = 160,
-                                    z = 0
-                                },
-                                1.2,
-                                0,
-                                115
-                            }
-                        }
+                            threadpool:work(function()
 
-                        local tdata2 = {
-                            [1] = "graphics",
-                            [2] =
-                                "createGraphicsImageByActor",
-                            [3] = {
-                                uin,
-                                {
-                                    imgid = imageId,
-                                    scale = 0.7,
-                                    apha = 90,
-                                    id = 1,
-                                    Type =
-                                        'GRAPHICS.GRAPHICS_IMAGE'
-                                },
-                                {
-                                    x = 0,
-                                    y = 50,
-                                    z = 0
-                                },
-                                1,
-                                0,
-                                150
-                            }
-                        }
+                                local uin =
+                                    AccountManager:getUin()
 
-                        pcall(function()
+                                if not uin then
+                                    _G.rgbTitle_enabled = false
+                                    return
+                                end
 
-                            ScriptSupportTask:reportTaskToHost(
-                                SSTASKID.HOST_BordCast,
-                                tdata1
-                            )
+                                local function splitUtf8(text)
 
-                            ScriptSupportTask:reportTaskToHost(
-                                SSTASKID.HOST_BordCast,
-                                tdata2
+                                    local chars = {}
+
+                                    for character in string.gmatch(
+                                        text,
+                                        "[%z\1-\127\194-\244][\128-\191]*"
+                                    ) do
+                                        table.insert(chars, character)
+                                    end
+
+                                    return chars
+                                end
+
+                                local function hsvToRgb(h, s, v)
+
+                                    local i =
+                                        math.floor(h * 6)
+
+                                    local f =
+                                        h * 6 - i
+
+                                    local p =
+                                        v * (1 - s)
+
+                                    local q =
+                                        v * (1 - f * s)
+
+                                    local t =
+                                        v * (1 - (1 - f) * s)
+
+                                    i = i % 6
+
+                                    if i == 0 then
+                                        return v, t, p
+                                    elseif i == 1 then
+                                        return q, v, p
+                                    elseif i == 2 then
+                                        return p, v, t
+                                    elseif i == 3 then
+                                        return p, q, v
+                                    elseif i == 4 then
+                                        return t, p, v
+                                    else
+                                        return v, p, q
+                                    end
+                                end
+
+                                local function rgbToHex(r, g, b)
+
+                                    return string.format(
+                                        "#c%02x%02x%02x",
+                                        math.floor(r * 255 + 0.5),
+                                        math.floor(g * 255 + 0.5),
+                                        math.floor(b * 255 + 0.5)
+                                    )
+                                end
+
+                                local characters =
+                                    splitUtf8(text)
+
+                                local offset = 0
+
+                                while _G.rgbTitle_enabled
+                                and generation ==
+                                    _G.rgbTitle_generation do
+
+                                    local result = {}
+
+                                    for i, character in
+                                        ipairs(characters) do
+
+                                        local hue
+
+                                        if mode == 1 then
+
+                                            hue =
+                                                0.48 +
+                                                math.sin(
+                                                    offset +
+                                                    (i - 1) * 0.45
+                                                ) * 0.08
+
+                                        elseif mode == 2 then
+
+                                            hue =
+                                                0.02 +
+                                                math.sin(
+                                                    offset +
+                                                    (i - 1) * 0.45
+                                                ) * 0.04
+
+                                        elseif mode == 3 then
+
+                                            hue =
+                                                (
+                                                    offset +
+                                                    (i - 1) * 0.08
+                                                ) % 1
+
+                                        else
+
+                                            hue =
+                                                0.91 +
+                                                math.sin(
+                                                    offset +
+                                                    (i - 1) * 0.45
+                                                ) * 0.035
+                                        end
+
+                                        local saturation
+                                        local value = 1.0
+
+                                        if mode == 1 then
+                                            saturation = 0.75
+                                        elseif mode == 2 then
+                                            saturation = 0.95
+                                        elseif mode == 3 then
+                                            saturation = 0.75
+                                        else
+                                            saturation = 0.45
+                                        end
+
+                                        local r, g, b =
+                                            hsvToRgb(
+                                                hue % 1,
+                                                saturation,
+                                                value
+                                            )
+
+                                        table.insert(
+                                            result,
+                                            rgbToHex(r, g, b)
+                                            .. character
+                                        )
+                                    end
+
+                                    local coloredTitle =
+                                        table.concat(result)
+
+                                    local tdata1 = {
+                                        [1] = "graphics",
+                                        [2] =
+                                            "createGraphicsTxtByActor",
+                                        [3] = {
+                                            uin,
+                                            {
+                                                title =
+                                                    coloredTitle,
+                                                fontsize = 20,
+                                                apha = 5,
+                                                itype = 2,
+                                                Type =
+                                                    'GRAPHICS.GRAPHICS_HORNBOOK'
+                                            },
+                                            {
+                                                x = 0,
+                                                y = 160,
+                                                z = 0
+                                            },
+                                            1.2,
+                                            0,
+                                            115
+                                        }
+                                    }
+
+                                    local tdata2 = {
+                                        [1] = "graphics",
+                                        [2] =
+                                            "createGraphicsImageByActor",
+                                        [3] = {
+                                            uin,
+                                            {
+                                                imgid = imageId,
+                                                scale = 0.7,
+                                                apha = 90,
+                                                id = 1,
+                                                Type =
+                                                    'GRAPHICS.GRAPHICS_IMAGE'
+                                            },
+                                            {
+                                                x = 0,
+                                                y = 50,
+                                                z = 0
+                                            },
+                                            1,
+                                            0,
+                                            150
+                                        }
+                                    }
+
+                                    pcall(function()
+
+                                        ScriptSupportTask:reportTaskToHost(
+                                            SSTASKID.HOST_BordCast,
+                                            tdata1
+                                        )
+
+                                        ScriptSupportTask:reportTaskToHost(
+                                            SSTASKID.HOST_BordCast,
+                                            tdata2
+                                        )
+
+                                    end)
+
+                                    offset =
+                                        offset + 0.10
+
+                                    threadpool:wait(0.05)
+                                end
+                            end)
+
+                            ShowGameTipsWithoutFilter(
+                                "#c00FF00RGB title enabled"
                             )
 
                         end)
-
-                        offset =
-                            offset + 0.10
-
-                        threadpool:wait(0.08)
-                    end
+                    end)
                 end)
-
-                ShowGameTipsWithoutFilter(
-                    "#c00FF00RGB title enabled"
-                )
-
-            end)
-        end)
-    end)
+            end
+        end
+    )
 end
 
 

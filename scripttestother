@@ -1140,7 +1140,7 @@ function sdsj()
                     end
 
                     ShowGameTipsWithoutFilter(
-                        "Enter Number of Icons (1-100)"
+                        "Enter Number of Icons (1-500)"
                     )
 
                     ShowTextInputSafe(function(countText)
@@ -1163,8 +1163,11 @@ function sdsj()
                             return
                         end
 
-                        if count > 100 then
-                            count = 100
+                        if count > 500 then
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Maximum is 500 icons"
+                            )
+                            return
                         end
 
                         _G.sdsj_enabled = false

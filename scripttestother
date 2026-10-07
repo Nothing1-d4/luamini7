@@ -2935,29 +2935,86 @@ function szfs()
 end
 
 function czgw()
-    local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-    local new_x, new_y, new_z = x / 100, y / 100, z / 100
-    local tdata = {
-        [1] = "world",
-        [2] = "spawnMob",
-        [3] = { new_x, new_y, new_z, 3603, 1, true }
-    }
-    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-end
 
-function phfk()
-    local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-    local gridX, gridY, gridZ = x / 100, y / 100, z / 100
-    
-    local startPos = { x = gridX - 25, y = gridY - 50, z = gridZ - 25 }
-    local endPos = { x = gridX + 24, y = gridY + 49, z = gridZ + 24 }
-    
-    local tdata = {
-        [1] = "area",
-        [2] = "clearAllBlockAreaRange",
-        [3] = { startPos, endPos, 0 }
-    }
-    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+    ShowGameTipsWithoutFilter(
+        "Enter creature id (id)"
+    )
+
+    ShowTextInputSafe(function(creatureText)
+
+        local creatureId = tonumber(creatureText)
+
+        if not creatureId then
+            ShowGameTipsWithoutFilter(
+                "#cFF0000Invalid creature id"
+            )
+            return
+        end
+
+        ShowGameTipsWithoutFilter(
+            "Enter amount (Number)"
+        )
+
+        ShowTextInputSafe(function(amountText)
+
+            local amount = tonumber(amountText)
+
+            if not amount then
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000Invalid amount"
+                )
+                return
+            end
+
+            amount = math.floor(amount)
+
+            if amount < 1 then
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000Amount must be at least 1"
+                )
+                return
+            end
+
+            if amount > 100 then
+                amount = 100
+            end
+
+            local x, y, z =
+                CurMainPlayer:getPosition(0, 0, 0)
+
+            local new_x = x / 100
+            local new_y = y / 100
+            local new_z = z / 100
+
+            for i = 1, amount do
+
+                local tdata = {
+                    [1] = "world",
+                    [2] = "spawnMob",
+                    [3] = {
+                        new_x,
+                        new_y,
+                        new_z,
+                        creatureId,
+                        1,
+                        true
+                    }
+                }
+
+                ScriptSupportTask:reportTaskToHost(
+                    SSTASKID.HOST_BordCast,
+                    tdata
+                )
+            end
+
+            ShowGameTipsWithoutFilter(
+                "#c00FF00Spawned "
+                .. amount
+                .. " creature(s)"
+            )
+
+        end)
+    end)
 end
 
 function wjsb()

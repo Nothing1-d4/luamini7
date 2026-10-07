@@ -1114,9 +1114,9 @@ function sdsj()
 
             if btnType == 0 then
 
-                _G.qcbf_enabled = false
-                _G.qcbf_generation =
-                    (_G.qcbf_generation or 0) + 1
+                _G.sdsj_enabled = false
+                _G.sdsj_generation =
+                    (_G.sdsj_generation or 0) + 1
 
                 ShowGameTipsWithoutFilter(
                     "#cFF0000Firework stopped"
@@ -1167,14 +1167,14 @@ function sdsj()
                             count = 100
                         end
 
-                        _G.qcbf_enabled = false
-                        _G.qcbf_generation =
-                            (_G.qcbf_generation or 0) + 1
+                        _G.sdsj_enabled = false
+                        _G.sdsj_generation =
+                            (_G.sdsj_generation or 0) + 1
 
-                        _G.qcbf_enabled = true
+                        _G.sdsj_enabled = true
 
                         local generation =
-                            _G.qcbf_generation
+                            _G.sdsj_generation
 
                         threadpool:work(function()
 
@@ -1182,7 +1182,7 @@ function sdsj()
                                 AccountManager:getUin()
 
                             if not uin then
-                                _G.qcbf_enabled = false
+                                _G.sdsj_enabled = false
                                 return
                             end
 
@@ -1227,9 +1227,9 @@ function sdsj()
                             local radius =
                                 startRadius
 
-                            while _G.qcbf_enabled
+                            while _G.sdsj_enabled
                             and generation ==
-                                _G.qcbf_generation do
+                                _G.sdsj_generation do
 
                                 for i = 1, count do
 

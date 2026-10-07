@@ -1,6 +1,6 @@
 ShowGameTipsWithoutFilter('Đã tải thành công')
 
-MessageBox(4,"#BThis is the OTHER version of MoonMenu v1")
+MessageBox(4,"#cFF0000您好，歡迎使用 \n #cFFAAFFModified MOON 選單 #G（版本 2.1），#cFFBEEE此版本包含一些已修改的功能。 \n \n \n #cFF00FF此內容將不時更新新功能。")
 
 InitGameAPI()
 GameVmTriggerInit()
@@ -1479,6 +1479,9 @@ GetInst("MessageBoxInterface"):dualBtnBox(
         if btnType == 0 then  -- 左边按钮：停止
             -- ===== 停止秒杀 =====
             _G.dtms_enabled = false
+              _G.tdwg_enabled = false
+               _G.tdwg_generation = _G.tdwg_generation + 1
+
             ShowGameTipsWithoutFilter("#cFF0000秒杀已停止")
             -- ====================
             
@@ -1541,6 +1544,8 @@ GetInst("MessageBoxInterface"):dualBtnBox(
                 
                 -- 获取选中的玩家UIN
                 local targetUin = this:GetClientID()
+
+                tdwg()
                 
                 ShowGameTipsWithoutFilter("#c00ffff已选择玩家：" .. targetUin .. "，开始无间隔1000次秒杀循环")
                 
@@ -4155,38 +4160,87 @@ function czzy()
 end
 
 function tdwg()
-    threadpool:work(function()
-        if not ClientCurGame or not ClientCurGame:isInGame() then
-            ShowGameTipsWithoutFilter("#cFF7aadHãy vào phòng trước")
-            return
-        end
-        
-        local uin = AccountManager:getUin()
-        if not uin then
-            ShowGameTipsWithoutFilter("#cff0000Không lấy được UIN người chơi")
-            return
-        end
 
-        local tdata1 = {
-            [1] = "graphics",
-            [2] = "createGraphicsTxtByActor",
-            [3] = { uin, { title = "#b#R萬物之#K神－#Y至高#G無上#W的超#B神", fontsize = 20, apha = 5, itype = 2, Type = 'GRAPHICS.GRAPHICS_HORNBOOK' }, { x = 0, y = 160, z = 0 }, 1.2, 0, 115 }
-        }
-        local tdata2 = {
-            [1] = "graphics",
-            [2] = "createGraphicsImageByActor",
-            [3] = { uin, { imgid = 10099, scale = 0.7, apha = 90, id = 1, Type = 'GRAPHICS.GRAPHICS_IMAGE' }, { x = 0, y = 50, z = 0 }, 1, 0, 150 }
-        }
-        
-        local ok, err = pcall(function()
-            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata1)
-            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata2)
-        end)
-        
-        if ok then
-            ShowGameTipsWithoutFilter("#c00ff00Đã hiện icon và danh hiệu trên đầu!")
-        else
-            ShowGameTipsWithoutFilter("#cff0000Lỗi tạo icon: " .. tostring(err))
+    _G.tdwg_enabled = true
+    _G.tdwg_generation =
+        (_G.tdwg_generation or 0) + 1
+
+    local generation =
+        _G.tdwg_generation
+
+    threadpool:work(function()
+
+        local baseHue = 0
+        local text =
+            "看来火焰的力量正在夺去这个人的性命。"
+
+        while _G.tdwg_enabled
+        and generation == _G.tdwg_generation do
+
+            local result = {}
+            local letterIndex = 0
+
+            for character in string.gmatch(
+                text,
+                "[%z\1-\127\194-\244][\128-\191]*"
+            ) do
+
+                local position =
+                    (baseHue + letterIndex * 0.08) % 1
+
+                local r, g, b
+
+                if position < 0.25 then
+                    local t = position / 0.25
+                    r = 255
+                    g = math.floor(20 + 100 * t)
+                    b = 0
+
+                elseif position < 0.50 then
+                    local t = (position - 0.25) / 0.25
+                    r = 255
+                    g = math.floor(120 + 135 * t)
+                    b = math.floor(30 * t)
+
+                elseif position < 0.75 then
+                    local t = (position - 0.50) / 0.25
+                    r = 255
+                    g = 255
+                    b = math.floor(30 + 150 * t)
+
+                else
+                    local t = (position - 0.75) / 0.25
+                    r = 255
+                    g = math.floor(255 - 150 * t)
+                    b = math.floor(180 - 180 * t)
+                end
+
+                table.insert(
+                    result,
+                    string.format(
+                        "#c%02x%02x%02x%s",
+                        r, g, b, character
+                    )
+                )
+
+                letterIndex = letterIndex + 1
+            end
+
+            local fireText = table.concat(result)
+
+            tdata = {}
+            tdata[1] = "chat"
+            tdata[2] = "sendChat"
+            tdata[3] = {fireText, 1, 0}
+
+            ScriptSupportTask:reportTaskToHost(
+                SSTASKID.HOST_BordCast,
+                tdata
+            )
+
+            baseHue = (baseHue + 0.08) % 1
+
+            threadpool:wait(0.2)
         end
     end)
 end

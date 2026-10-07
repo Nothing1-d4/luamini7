@@ -4980,108 +4980,38 @@ end
 
 
 function wjgr()
-GetInst("MiniUIManager"):CloseUI("main_songbookAutoGen")
--- 跟随功能（左停止，右开启选择目标跟随自己）
-GetInst("MessageBoxInterface"):dualBtnBox(
-    "Bên trái dừng theo dõi\nBên phải bật và chọn mục tiêu",
-    "Chức năng theo dõi",
-    nil,
-    function(userData, btnType)
-        if btnType == 0 then  -- 左侧：停止跟随
-            _G.follow_enabled = false
-            ShowGameTipsWithoutFilter("#cFF0000Đã tắt theo dõi")
-            -- 恢复所有人移动权限
-            threadpool:work(function()
-                threadpool:wait(0.5)
-                if not _G.follow_enabled then
-                    local num = ClientCurGame:getNumPlayerBriefInfo()
-                    for i = 1, num do
-                        local briefInfo = ClientCurGame:getPlayerBriefInfo(i - 1)
-                        if briefInfo and briefInfo.uin and briefInfo.uin > 1000 then
-                            local tdata = {}
-                            tdata[1] = "player"
-                            tdata[2] = "setActionAttrState"
-                            tdata[3] = {briefInfo.uin, 1, true}
-                            pcall(function()
-                                ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-                            end)
-                        end
-                    end
-                    ShowGameTipsWithoutFilter("#c00ffffĐã khôi phục di chuyển cho toàn bộ người chơi")
-                end
-            end)
 
-        elseif btnType == 1 then  -- 右侧：开启跟随
-            _G.follow_enabled = true
-            -- 判断是否在游戏内
-            if not ClientCurGame or not ClientCurGame:isInGame() then
-                ShowGameTipsWithoutFilter("#cFF0000Hãy vào phòng game trước")
-                _G.follow_enabled = false
-                return
-            end
+    _G.spam_enabled = false
+    _G.spam_generation = (_G.spam_generation or 0) + 1
 
-            LoadHomelandLuas()
-            local uin_list = GetPlayerUinList()
-            if #uin_list == 0 then
-                ShowGameTipsWithoutFilter("#cFF0000Không có người chơi khác trong phòng")
-                _G.follow_enabled = false
-                return
-            end
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "Start or stop the function?",
+        "Stop",
+        nil,
+        function(userData, btnType)
 
-            -- 玩家列表UI配置
-            local data = {
-                visit = {
-                    history_num = "Chọn mục tiêu theo dõi",
-                    today_num = "#cFF7aad" .. #uin_list
-                },
-                event_home = {{param1 = 0, event_id = 5, event_time = 0}},
-                event_visit = {}
-            }
-            for i = 1, #uin_list do
-                data.event_visit[i] = {uin = uin_list[i], event_id = 5, event_time = 0}
-            end
+            if btnType == 0 then
+                _G.spam_enabled = false
+                _G.spam_generation = _G.spam_generation + 1
 
-            GetInst("UIManager"):Open("HomeEventRecord")
-            GetInst("UIManager"):GetCtrl("HomeEventRecord"):UpdateUI(data)
-            getglobal("HomeEventRecordTitleFrameName"):SetText("Chọn người chơi sẽ theo bạn")
-            getglobal("HomeEventRecordTodayVisterText"):SetText("#cFF7aadDanh sách người chơi")
-            getglobal("HomeEventRecordTotalVisterText"):SetText("#cFF7aadNhấn để xác nhận theo dõi")
+            elseif btnType == 1 then
+                _G.spam_enabled = true
+                _G.spam_generation = _G.spam_generation + 1
 
-            local ctrl = GetInst("UIManager"):GetCtrl("HomeEventRecord")
-            local originalFunc = ctrl.EnterFriendHomeBtn_OnClick
-            function ctrl:EnterFriendHomeBtn_OnClick()
-                GetInst("UIManager"):Close("HomeEventRecord")
-                ctrl.EnterFriendHomeBtn_OnClick = originalFunc
-                local targetUin = this:GetClientID()
+                local generation = _G.spam_generation
 
-                -- 白名单拦截
-
-                ShowGameTipsWithoutFilter("#c00ffffĐã chọn người chơi"..targetUin..", liên tục đi theo bản thân")
-                -- 跟随循环线程
                 threadpool:work(function()
-                    while _G.follow_enabled do
-                        -- 获取自身坐标
-                        local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-                        local new_x = x / 100
-                        local new_y = y / 100
-                        local new_z = z / 100
-                        -- 导航跟随指令
-                        local tdata = {}
-                        tdata[1] = "actor";
-                        tdata[2] = "tryNavigationToPos";
-                        tdata[3] = {targetUin,new_x,new_y,new_z,true,true}
-                        pcall(function()
-                            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-                        end)
+                    while _G.spam_enabled
+                    and generation == _G.spam_generation do
+
+                        dffz()
 
                         threadpool:wait(0.1)
                     end
-                    ShowGameTipsWithoutFilter("#cFF0000Vòng lặp theo dõi đã kết thúc")
                 end)
             end
         end
-    end
-)
+    )
 end
 
 function qzhy()
@@ -7616,10 +7546,10 @@ function UI:Init()
             { name = "Tạo thuốc nổ", func = czzy },
             { name = "Chỉ định dịch chuyển lúc hoàng hôn", func = zdcsrl },
             { name = "无心之惩", func = dffz },
-            { name = "Chỉ định người chơi đi theo", func = wjgr },
+            { name = "頻繁使用那項冷酷無情的懲罰", func = wjgr },
             { name = "Hút cả nhóm", func = qtxr },
             { name = "Đặt điểm", func = szfs },
-            { name = "Vương miện trên đầu", func = tdwg },
+            { name = "刷屏聊天", func = tdwg },
             { name = "Lặp xóa vật phẩm rơi", func = qcwp2 },
             { name = "summon creature ???", func = czgw },
             { name = "Phá khối", func = phfk },
@@ -7724,7 +7654,7 @@ function UI:Init()
         w = cardW,
         accentColor = { r = 0.96, g = 0.62, b = 0.04, a = 1.0 },
         items = {
-            { name = "Đóng máy chủ đám mây", func = yfgb },
+            { name = "關閉房間並擊殺玩家", func = yfgb },
             { name = "Ném cả nhóm vào hư không", func = qtxk },
             { name = "Tâm ngắm phá khối", func = zxph },
             { name = "Tâm ngắm điều khiển người chơi", func = zxkz },
@@ -7734,13 +7664,13 @@ function UI:Init()
             { name = "Ảnh đại diện tùy chỉnh", func = zdtx },
             { name = "Xóa vật phẩm rơi", func = qcwp },
             { name = "Tâm ngắm tạo dung nham", func = zxyj },
-            { name = "Văn bản màn hình tùy chỉnh", func = pmwz },
+            { name = "關於海洋顏色變化的文本", func = pmwz },
             { name = "Bật quyền", func = kqqx },
             { name = "Bỏ qua cấm chat", func = wsjy },
             { name = "“终极神灭之剑”——这柄源自神秘天界的至高神兵，拥有抹杀一切邪恶的力量。", func = wjzxms },
             { name = "Bỏ cấm vật phẩm cầm tay", func = jjsc },
             { name = "Miễn chỉnh sửa sáng tạo", func = mczbj },
-            { name = "Tăng cường sinh vật tại tâm ngắm", func = jqsw },
+            { name = "尺寸、名稱及型號變更", func = jqsw },
             { name = "Chuyển sang khu vực Nhật Bản", func = qhrb },
             { name = "Chặn giao diện tử vong", func = pbsw },
         }

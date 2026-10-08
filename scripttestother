@@ -2956,9 +2956,8 @@ end
 
 function qhdw()
 
-    _G.customTimer_enabled = false
-    _G.customTimer_generation =
-        (_G.customTimer_generation or 0) + 1
+    _G.qhdw_enabled = false
+    _G.qhdw_generation = (_G.qhdw_generation or 0) + 1
 
     GetInst("MessageBoxInterface"):dualBtnBox(
         "Do you want to run this?",
@@ -2968,144 +2967,124 @@ function qhdw()
 
             if btnType == 0 then
 
-                _G.customTimer_enabled = false
-                _G.customTimer_generation =
-                    _G.customTimer_generation + 1
+                _G.qhdw_enabled = false
+                _G.qhdw_generation = _G.qhdw_generation + 1
 
-                ShowGameTipsWithoutFilter(
-                    "#cFF0000Stopped"
-                )
+                ShowGameTipsWithoutFilter("#c0000FFStopped")
 
             elseif btnType == 1 then
 
-                _G.customTimer_enabled = true
-
-                ShowGameTipsWithoutFilter(
-                    "#cFFFFFFEnter the text:"
-                )
+                _G.qhdw_enabled = true
 
                 ShowTextInputSafe(function(text)
 
-                    if not _G.customTimer_enabled then
+                    if not _G.qhdw_enabled then
                         return
                     end
 
-                    ShowGameTipsWithoutFilter(
-                        "#cFFFFFFEnter colour: 1=Ocean 2=Fire 3=Rainbow 4=Sakura"
-                    )
+                    ShowTextInputSafe(function(colourChoice)
 
-                    ShowTextInputSafe(function(colorInput)
-
-                        if not _G.customTimer_enabled then
+                        if not _G.qhdw_enabled then
                             return
                         end
 
-                        local colorMode = tonumber(colorInput)
+                        ShowTextInputSafe(function(timerText)
 
-                        if colorMode ~= 1
-                        and colorMode ~= 2
-                        and colorMode ~= 3
-                        and colorMode ~= 4 then
-
-                            ShowGameTipsWithoutFilter(
-                                "#cFF0000Invalid colour. Use 1, 2, 3 or 4."
-                            )
-
-                            _G.customTimer_enabled = false
-                            return
-                        end
-
-                        ShowGameTipsWithoutFilter(
-                            "#cFFFFFFEnter timer number:"
-                        )
-
-                        ShowTextInputSafe(function(timerInput)
-
-                            if not _G.customTimer_enabled then
+                            if not _G.qhdw_enabled then
                                 return
                             end
-
-                            local timerNumber = tonumber(timerInput)
-
-                            if not timerNumber
-                            or timerNumber < 0
-                            or timerNumber % 1 ~= 0 then
-
-                                ShowGameTipsWithoutFilter(
-                                    "#cFF0000Invalid timer number."
-                                )
-
-                                _G.customTimer_enabled = false
-                                return
-                            end
-
-                            ShowGameTipsWithoutFilter(
-                                "#cFFFFFFEnter function variable:"
-                            )
 
                             ShowTextInputSafe(function(functionName)
 
-                                if not _G.customTimer_enabled then
+                                if not _G.qhdw_enabled then
                                     return
                                 end
 
-                                local safeFunctions = {
-                                    qtxk = qtxk,
-                                    fsjg = fsjg,
-                                    dffz = dffz
-                                }
+                                local timerNumber = tonumber(timerText)
 
-                                local selectedFunction =
-                                    safeFunctions[functionName]
+                                if not timerNumber then
+                                    ShowGameTipsWithoutFilter(
+                                        "#cFF4444Invalid timer number"
+                                    )
+                                    _G.qhdw_enabled = false
+                                    return
+                                end
+
+                                timerNumber = math.floor(timerNumber)
+
+                                if timerNumber < 1 then
+                                    ShowGameTipsWithoutFilter(
+                                        "#cFF4444Timer must be at least 1"
+                                    )
+                                    _G.qhdw_enabled = false
+                                    return
+                                end
+
+                                local selectedFunction = nil
+
+                                if functionName == "qtxk" then
+                                    selectedFunction = qtxk
+
+                                elseif functionName == "tdwg" then
+                                    selectedFunction = tdwg
+
+                                elseif functionName == "dffz" then
+                                    selectedFunction = dffz
+                                end
 
                                 if type(selectedFunction) ~= "function" then
-
                                     ShowGameTipsWithoutFilter(
-                                        "#cFF0000Invalid function variable."
+                                        "#cFF4444Invalid function"
                                     )
-
-                                    _G.customTimer_enabled = false
+                                    _G.qhdw_enabled = false
                                     return
                                 end
 
-                                ShowGameTipsWithoutFilter(
-                                    "#cFFFFFFStarting timer..."
-                                )
+                                local colourMode =
+                                    tonumber(colourChoice)
+
+                                if colourMode ~= 1
+                                and colourMode ~= 2
+                                and colourMode ~= 3
+                                and colourMode ~= 4 then
+
+                                    ShowGameTipsWithoutFilter(
+                                        "#cFF4444Invalid colour"
+                                    )
+
+                                    _G.qhdw_enabled = false
+                                    return
+                                end
 
                                 local generation =
-                                    _G.customTimer_generation
+                                    _G.qhdw_generation
+
+                                tdata = {}
+                                tdata[1] = "minitimer2"
+                                tdata[2] = "createTimer"
+                                tdata[3] = {""}
+
+                                ScriptSupportTask:reportTaskToHost(
+                                    SSTASKID.HOST_BordCast,
+                                    tdata
+                                )
+
+                                tdata = {}
+                                tdata[1] = "minitimer2"
+                                tdata[2] = "startBackwardTimer"
+                                tdata[3] = {1, timerNumber, false}
+
+                                ScriptSupportTask:reportTaskToHost(
+                                    SSTASKID.HOST_BordCast,
+                                    tdata
+                                )
 
                                 threadpool:work(function()
 
                                     local baseHue = 0
 
-                                    tdata = {}
-                                    tdata[1] = "minitimer2"
-                                    tdata[2] = "createTimer"
-                                    tdata[3] = {""}
-
-                                    ScriptSupportTask:reportTaskToHost(
-                                        SSTASKID.HOST_BordCast,
-                                        tdata
-                                    )
-
-                                    tdata = {}
-                                    tdata[1] = "minitimer2"
-                                    tdata[2] = "startBackwardTimer"
-                                    tdata[3] = {
-                                        1,
-                                        timerNumber,
-                                        false
-                                    }
-
-                                    ScriptSupportTask:reportTaskToHost(
-                                        SSTASKID.HOST_BordCast,
-                                        tdata
-                                    )
-
-                                    while _G.customTimer_enabled
-                                    and generation ==
-                                        _G.customTimer_generation do
+                                    while _G.qhdw_enabled
+                                    and generation == _G.qhdw_generation do
 
                                         local characters = {}
 
@@ -3122,8 +3101,9 @@ function qhdw()
                                         local result = {}
                                         local letterIndex = 0
 
-                                        for _, character in
-                                            ipairs(characters) do
+                                        for _, character in ipairs(
+                                            characters
+                                        ) do
 
                                             if character == " "
                                             or character == "\n" then
@@ -3135,94 +3115,239 @@ function qhdw()
 
                                             else
 
-                                                local position =
-                                                    (
-                                                        baseHue
-                                                        + letterIndex * 0.08
-                                                    ) % 1
-
                                                 local r, g, b
 
-                                                if colorMode == 1 then
+                                                if colourMode == 1 then
 
-                                                    r = 0
-                                                    g = math.floor(
-                                                        80 + position * 100
-                                                    )
-                                                    b = math.floor(
-                                                        150 + position * 105
-                                                    )
+                                                    local position =
+                                                        (
+                                                            baseHue
+                                                            + letterIndex * 0.08
+                                                        ) % 1
 
-                                                elseif colorMode == 2 then
+                                                    if position < 0.16 then
 
-                                                    r = 255
-                                                    g = math.floor(
-                                                        40 + position * 215
-                                                    )
-                                                    b = math.floor(
-                                                        position * 60
-                                                    )
+                                                        local t =
+                                                            position / 0.16
 
-                                                elseif colorMode == 3 then
-
-                                                    local h = position * 6
-                                                    local x =
-                                                        1 - math.abs(
-                                                            (h % 2) - 1
-                                                        )
-
-                                                    if h < 1 then
-                                                        r = 255
-                                                        g = math.floor(
-                                                            x * 255
-                                                        )
-                                                        b = 0
-
-                                                    elseif h < 2 then
-                                                        r = math.floor(
-                                                            x * 255
-                                                        )
-                                                        g = 255
-                                                        b = 0
-
-                                                    elseif h < 3 then
                                                         r = 0
-                                                        g = 255
+                                                        g = math.floor(
+                                                            8 + 45 * t
+                                                        )
                                                         b = math.floor(
-                                                            x * 255
+                                                            20 + 80 * t
                                                         )
 
-                                                    elseif h < 4 then
+                                                    elseif position < 0.32 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.16
+                                                            ) / 0.16
+
                                                         r = 0
                                                         g = math.floor(
-                                                            x * 255
+                                                            53 + 100 * t
+                                                        )
+                                                        b = math.floor(
+                                                            100 + 120 * t
+                                                        )
+
+                                                    elseif position < 0.48 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.32
+                                                            ) / 0.16
+
+                                                        r = math.floor(
+                                                            0 + 120 * t
+                                                        )
+                                                        g = math.floor(
+                                                            153 + 80 * t
+                                                        )
+                                                        b = 220
+
+                                                    elseif position < 0.64 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.48
+                                                            ) / 0.16
+
+                                                        r = math.floor(
+                                                            120 + 135 * t
+                                                        )
+                                                        g = math.floor(
+                                                            233 + 22 * t
                                                         )
                                                         b = 255
 
-                                                    elseif h < 5 then
+                                                    elseif position < 0.80 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.64
+                                                            ) / 0.16
+
                                                         r = math.floor(
-                                                            x * 255
+                                                            255 - 255 * t
                                                         )
-                                                        g = 0
-                                                        b = 255
+                                                        g = math.floor(
+                                                            255 - 180 * t
+                                                        )
+                                                        b = math.floor(
+                                                            255 - 100 * t
+                                                        )
 
                                                     else
-                                                        r = 255
-                                                        g = 0
-                                                        b = math.floor(
-                                                            x * 255
+
+                                                        local t =
+                                                            (
+                                                                position - 0.80
+                                                            ) / 0.20
+
+                                                        r = 0
+                                                        g = math.floor(
+                                                            75 - 67 * t
                                                         )
+                                                        b = math.floor(
+                                                            155 - 135 * t
+                                                        )
+
+                                                    end
+
+                                                elseif colourMode == 2 then
+
+                                                    local position =
+                                                        (
+                                                            baseHue
+                                                            + letterIndex * 0.08
+                                                        ) % 1
+
+                                                    if position < 0.5 then
+
+                                                        local t =
+                                                            position / 0.5
+
+                                                        r = 255
+                                                        g = math.floor(
+                                                            40 + 215 * t
+                                                        )
+                                                        b = 0
+
+                                                    else
+
+                                                        local t =
+                                                            (
+                                                                position - 0.5
+                                                            ) / 0.5
+
+                                                        r = 255
+                                                        g = math.floor(
+                                                            255 - 180 * t
+                                                        )
+                                                        b = math.floor(
+                                                            40 * t
+                                                        )
+
+                                                    end
+
+                                                elseif colourMode == 3 then
+
+                                                    local position =
+                                                        (
+                                                            baseHue
+                                                            + letterIndex * 0.08
+                                                        ) % 1
+
+                                                    if position < 0.2 then
+
+                                                        local t =
+                                                            position / 0.2
+
+                                                        r = math.floor(
+                                                            255 * t
+                                                        )
+                                                        g = 0
+                                                        b = 255
+
+                                                    elseif position < 0.4 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.2
+                                                            ) / 0.2
+
+                                                        r = 255
+                                                        g = math.floor(
+                                                            255 * t
+                                                        )
+                                                        b = math.floor(
+                                                            255 - 255 * t
+                                                        )
+
+                                                    elseif position < 0.6 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.4
+                                                            ) / 0.2
+
+                                                        r = math.floor(
+                                                            255 - 255 * t
+                                                        )
+                                                        g = 255
+                                                        b = 0
+
+                                                    elseif position < 0.8 then
+
+                                                        local t =
+                                                            (
+                                                                position - 0.6
+                                                            ) / 0.2
+
+                                                        r = 0
+                                                        g = math.floor(
+                                                            255 - 255 * t
+                                                        )
+                                                        b = math.floor(
+                                                            255 * t
+                                                        )
+
+                                                    else
+
+                                                        local t =
+                                                            (
+                                                                position - 0.8
+                                                            ) / 0.2
+
+                                                        r = math.floor(
+                                                            255 * t
+                                                        )
+                                                        g = 0
+                                                        b = 255
+
                                                     end
 
                                                 else
 
-                                                    r = 255
+                                                    local position =
+                                                        (
+                                                            baseHue
+                                                            + letterIndex * 0.08
+                                                        ) % 1
+
+                                                    r = math.floor(
+                                                        255 * position
+                                                    )
+
                                                     g = math.floor(
-                                                        100 + position * 100
+                                                        120 + 135 *
+                                                        (1 - position)
                                                     )
-                                                    b = math.floor(
-                                                        150 + position * 105
-                                                    )
+
+                                                    b = 255
 
                                                 end
 
@@ -3242,7 +3367,7 @@ function qhdw()
                                             end
                                         end
 
-                                        local coloredText =
+                                        local animatedText =
                                             table.concat(result)
 
                                         tdata = {}
@@ -3251,7 +3376,7 @@ function qhdw()
                                         tdata[3] = {
                                             {0},
                                             1,
-                                            coloredText,
+                                            animatedText,
                                             true
                                         }
 
@@ -3261,28 +3386,54 @@ function qhdw()
                                         )
 
                                         baseHue =
-                                            (baseHue + 0.1) % 1
+                                            (baseHue + 0.02) % 1
+
+                                        threadpool:wait(0.05)
+                                    end
+                                end)
+
+                                threadpool:work(function()
+
+                                    local remaining =
+                                        timerNumber
+
+                                    while _G.qhdw_enabled
+                                    and generation == _G.qhdw_generation
+                                    and remaining > 0 do
 
                                         threadpool:wait(1.0)
 
-                                        if not _G.customTimer_enabled
+                                        if not _G.qhdw_enabled
                                         or generation ~=
-                                            _G.customTimer_generation then
+                                            _G.qhdw_generation then
                                             return
                                         end
+
+                                        remaining =
+                                            remaining - 1
                                     end
+
+                                    if not _G.qhdw_enabled
+                                    or generation ~= _G.qhdw_generation then
+                                        return
+                                    end
+
+                                    _G.qhdw_enabled = false
 
                                     pcall(function()
                                         selectedFunction()
                                     end)
 
-                                    _G.customTimer_enabled = false
-
                                 end)
+
                             end)
+
                         end)
+
                     end)
+
                 end)
+
             end
         end
     )

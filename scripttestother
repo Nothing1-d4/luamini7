@@ -2956,8 +2956,6 @@ end
 
 function qhdw()
 
-function customTimer()
-
     _G.customTimer_enabled = false
     _G.customTimer_generation =
         (_G.customTimer_generation or 0) + 1

@@ -8094,6 +8094,112 @@ UI.visible = true
 UI.currentScale = 1.0
 UI.isInitializing = false
 
+-- =========================================================================
+-- WATCHER
+-- =========================================================================
+UI.WatcherX = 990
+UI.WatcherY = 10
+UI.WatcherFontSize = 18
+UI.WatcherText = nil
+UI.WatcherStarted = false
+UI.WatcherMessageGeneration = 0
+
+function UI:CreateWatcher()
+    local root = GRoot:getInstance()
+    if not root then return end
+
+    if self.WatcherText and not tolua.isnull(self.WatcherText) then
+        return
+    end
+
+    local text = GBasicTextField:create()
+    text:setText("Hello! : <o>")
+    text:setFontSize(self.WatcherFontSize)
+    text:setColor({ r = 80, g = 255, b = 100 })
+    text:setPosition(self.WatcherX, self.WatcherY)
+    text:setTouchable(false)
+    pcall(function() text:setSingleLine(true) end)
+    pcall(function() text:setSortingOrder(100000) end)
+
+    root:addChild(text)
+
+    self.WatcherText = text
+    self.WatcherStarted = false
+end
+
+function UI:SetWatcherText(message)
+    if not self.WatcherText or tolua.isnull(self.WatcherText) then
+        self:CreateWatcher()
+    end
+
+    if self.WatcherText and not tolua.isnull(self.WatcherText) then
+        self.WatcherText:setText(message)
+    end
+end
+
+function UI:WatcherFeature(onClick)
+    if not self.WatcherStarted then
+        self.WatcherStarted = true
+        self:SetWatcherText("Hello! : <o>")
+
+        local generation = self.WatcherMessageGeneration
+
+        threadpool:work(function()
+            threadpool:wait(1.0)
+
+            if generation ~= self.WatcherMessageGeneration then
+                return
+            end
+
+            if self.WatcherStarted
+            and self.WatcherText
+            and not tolua.isnull(self.WatcherText) then
+                self:SetWatcherText("<o> watching your gameplay")
+            end
+        end)
+
+        return
+    end
+
+    local message = nil
+
+    if onClick == sdsj then
+        message = "Kaboom! : <o>"
+    elseif onClick == qcbf then
+        message = "nice orbit : <o>"
+    elseif onClick == dffz then
+        message = "hm you should stop : <o>"
+    elseif onClick == wjzxms then
+        message = "OK TOO FAR : <o>"
+    elseif onClick == zhcw then
+        message = "your a angel huh : <o>"
+    end
+
+    if not message then
+        return
+    end
+
+    self.WatcherMessageGeneration =
+        self.WatcherMessageGeneration + 1
+
+    local generation = self.WatcherMessageGeneration
+
+    self:SetWatcherText(message)
+
+    threadpool:work(function()
+        threadpool:wait(5.0)
+
+        if generation ~= self.WatcherMessageGeneration then
+            return
+        end
+
+        if self.WatcherText
+        and not tolua.isnull(self.WatcherText) then
+            self:SetWatcherText("<o> watching your gameplay")
+        end
+    end)
+end
+
 -- Alias hàm cần thiết
 rwjs = rwjs_speed or rwjs
 if not jzjr then
@@ -8155,6 +8261,7 @@ function UI:CreateItemButton(parent, name, x, y, w, h, onClick)
     -- Xử lý click an toàn với threadpool:work & pcall
     btn:addEventListener(UIEventType_Click, function()
         if onClick then
+            UI:WatcherFeature(onClick)
             threadpool:work(function()
                 local ok, err = pcall(onClick)
                 if ok then
@@ -8638,6 +8745,7 @@ function UI:Init()
     local ok, err = pcall(function()
         self:Destroy()
         self.visible = true
+        self:CreateWatcher()
 
         local cardW = 180
 

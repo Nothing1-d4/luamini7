@@ -2966,7 +2966,9 @@ function qhdw()
                 return
             end
 
-            ShowGameTipsWithoutFilter("Enter text")
+            ShowGameTipsWithoutFilter(
+                "Enter text"
+            )
 
             ShowTextInputSafe(function(text)
 
@@ -3054,6 +3056,7 @@ function qhdw()
                             end
 
                             _G.customTimer_enabled = false
+
                             _G.customTimer_generation =
                                 (_G.customTimer_generation or 0) + 1
 
@@ -3063,6 +3066,17 @@ function qhdw()
                                 _G.customTimer_generation
 
                             threadpool:work(function()
+
+                                local tdata = {}
+
+                                tdata[1] = "minitimer2"
+                                tdata[2] = "createTimer"
+                                tdata[3] = {""}
+
+                                ScriptSupportTask:reportTaskToHost(
+                                    SSTASKID.HOST_BordCast,
+                                    tdata
+                                )
 
                                 local currentTimer =
                                     timer
@@ -3080,16 +3094,20 @@ function qhdw()
                                         text,
                                         "[%z\1-\127\194-\244][\128-\191]*"
                                     ) do
+
                                         table.insert(
                                             characters,
                                             character
                                         )
+
                                     end
 
                                     local result = {}
                                     local letterIndex = 0
 
-                                    for _, character in ipairs(characters) do
+                                    for _, character in ipairs(
+                                        characters
+                                    ) do
 
                                         if character == " "
                                         or character == "\n" then
@@ -3195,6 +3213,7 @@ function qhdw()
                                                     b = math.floor(
                                                         155 - 135 * t
                                                     )
+
                                                 end
 
                                             elseif colour == 2 then
@@ -3225,13 +3244,16 @@ function qhdw()
                                                     b = math.floor(
                                                         25 - 20 * t
                                                     )
+
                                                 end
 
                                             elseif colour == 3 then
 
-                                                local h = position * 6
+                                                local h =
+                                                    position * 6
 
                                                 if h < 1 then
+
                                                     r = 255
                                                     g = math.floor(
                                                         h * 255
@@ -3239,13 +3261,16 @@ function qhdw()
                                                     b = 0
 
                                                 elseif h < 2 then
+
                                                     r = math.floor(
-                                                        255 - (h - 1) * 255
+                                                        255 -
+                                                        (h - 1) * 255
                                                     )
                                                     g = 255
                                                     b = 0
 
                                                 elseif h < 3 then
+
                                                     r = 0
                                                     g = 255
                                                     b = math.floor(
@@ -3253,13 +3278,16 @@ function qhdw()
                                                     )
 
                                                 elseif h < 4 then
+
                                                     r = 0
                                                     g = math.floor(
-                                                        255 - (h - 3) * 255
+                                                        255 -
+                                                        (h - 3) * 255
                                                     )
                                                     b = 255
 
                                                 elseif h < 5 then
+
                                                     r = math.floor(
                                                         (h - 4) * 255
                                                     )
@@ -3267,11 +3295,14 @@ function qhdw()
                                                     b = 255
 
                                                 else
+
                                                     r = 255
                                                     g = 0
                                                     b = math.floor(
-                                                        255 - (h - 5) * 255
+                                                        255 -
+                                                        (h - 5) * 255
                                                     )
+
                                                 end
 
                                             else
@@ -3302,7 +3333,9 @@ function qhdw()
                                                     b = math.floor(
                                                         240 - 20 * t
                                                     )
+
                                                 end
+
                                             end
 
                                             table.insert(
@@ -3318,28 +3351,36 @@ function qhdw()
 
                                             letterIndex =
                                                 letterIndex + 1
+
                                         end
                                     end
 
-                                    local timerTextDisplay =
+                                    local coloredText =
                                         table.concat(result)
+
+                                    local displayText =
+                                        coloredText
                                         .. "  "
                                         .. tostring(currentTimer)
 
-                                    local tdata = {}
+                                    local timerData = {}
 
-                                    tdata[1] = "minitimer2"
-                                    tdata[2] = "showTimerTips"
-                                    tdata[3] = {
-                                        {0},
+                                    timerData[1] =
+                                        "minitimer2"
+
+                                    timerData[2] =
+                                        "showTimerTips"
+
+                                    timerData[3] = {
+                                        {{0}},
                                         1,
-                                        timerTextDisplay,
+                                        displayText,
                                         true
                                     }
 
                                     ScriptSupportTask:reportTaskToHost(
                                         SSTASKID.HOST_BordCast,
-                                        tdata
+                                        timerData
                                     )
 
                                     if currentTimer <= 0 then
@@ -3353,13 +3394,15 @@ function qhdw()
 
                                     currentTimer =
                                         currentTimer - 1
+
                                 end
 
                                 if _G.customTimer_enabled
                                 and generation ==
                                     _G.customTimer_generation then
 
-                                    _G.customTimer_enabled = false
+                                    _G.customTimer_enabled =
+                                        false
 
                                     pcall(function()
                                         selectedFunction()

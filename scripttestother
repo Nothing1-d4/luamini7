@@ -2955,19 +2955,430 @@ function zhcw()
 end
 
 function qhdw()
-    ShowTextInputSafe(function(text)
-        local value = tonumber(text)
-        if not value then
-            ShowGameTipsWithoutFilter("Hãy nhập ID đội hợp lệ (dạng số)")
-            return
+
+    GetInst("MessageBoxInterface"):dualBtnBox(
+        "Do you want to start the custom timer?",
+        "CANCEL",
+        "CONFIRM",
+        function(userData, btnType)
+
+            if btnType == 0 then
+                return
+            end
+
+            ShowGameTipsWithoutFilter("Enter text")
+
+            ShowTextInputSafe(function(text)
+
+                if not text or text == "" then
+                    ShowGameTipsWithoutFilter(
+                        "#cFF0000Invalid text"
+                    )
+                    return
+                end
+
+                ShowGameTipsWithoutFilter(
+                    "Enter colour (1 Ocean 2 Fire 3 Rainbow 4 Sakura)"
+                )
+
+                ShowTextInputSafe(function(colourText)
+
+                    local colour = tonumber(colourText)
+
+                    if not colour then
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000Invalid colour"
+                        )
+                        return
+                    end
+
+                    colour = math.floor(colour)
+
+                    if colour < 1 or colour > 4 then
+                        ShowGameTipsWithoutFilter(
+                            "#cFF0000Colour must be 1-4"
+                        )
+                        return
+                    end
+
+                    ShowGameTipsWithoutFilter(
+                        "Enter timer"
+                    )
+
+                    ShowTextInputSafe(function(timerText)
+
+                        local timer =
+                            tonumber(timerText)
+
+                        if not timer then
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Invalid timer"
+                            )
+                            return
+                        end
+
+                        timer = math.floor(timer)
+
+                        if timer < 1 then
+                            ShowGameTipsWithoutFilter(
+                                "#cFF0000Timer must be at least 1"
+                            )
+                            return
+                        end
+
+                        ShowGameTipsWithoutFilter(
+                            "Enter function variable"
+                        )
+
+                        ShowTextInputSafe(function(functionText)
+
+                            if not functionText
+                            or functionText == "" then
+                                ShowGameTipsWithoutFilter(
+                                    "#cFF0000Invalid function"
+                                )
+                                return
+                            end
+
+                            local functionName =
+                                functionText
+
+                            local selectedFunction =
+                                _G[functionName]
+
+                            if type(selectedFunction) ~= "function" then
+                                ShowGameTipsWithoutFilter(
+                                    "#cFF0000Function not found"
+                                )
+                                return
+                            end
+
+                            _G.customTimer_enabled = false
+                            _G.customTimer_generation =
+                                (_G.customTimer_generation or 0) + 1
+
+                            _G.customTimer_enabled = true
+
+                            local generation =
+                                _G.customTimer_generation
+
+                            threadpool:work(function()
+
+                                local currentTimer =
+                                    timer
+
+                                local baseHue = 0
+
+                                while _G.customTimer_enabled
+                                and generation ==
+                                    _G.customTimer_generation
+                                and currentTimer >= 0 do
+
+                                    local characters = {}
+
+                                    for character in string.gmatch(
+                                        text,
+                                        "[%z\1-\127\194-\244][\128-\191]*"
+                                    ) do
+                                        table.insert(
+                                            characters,
+                                            character
+                                        )
+                                    end
+
+                                    local result = {}
+                                    local letterIndex = 0
+
+                                    for _, character in ipairs(characters) do
+
+                                        if character == " "
+                                        or character == "\n" then
+
+                                            table.insert(
+                                                result,
+                                                character
+                                            )
+
+                                        else
+
+                                            local position =
+                                                (
+                                                    baseHue
+                                                    + letterIndex * 0.08
+                                                ) % 1
+
+                                            local r, g, b
+
+                                            if colour == 1 then
+
+                                                if position < 0.16 then
+
+                                                    local t =
+                                                        position / 0.16
+
+                                                    r = 0
+                                                    g = math.floor(
+                                                        8 + 45 * t
+                                                    )
+                                                    b = math.floor(
+                                                        20 + 80 * t
+                                                    )
+
+                                                elseif position < 0.32 then
+
+                                                    local t =
+                                                        (position - 0.16)
+                                                        / 0.16
+
+                                                    r = 0
+                                                    g = math.floor(
+                                                        53 + 100 * t
+                                                    )
+                                                    b = math.floor(
+                                                        100 + 120 * t
+                                                    )
+
+                                                elseif position < 0.48 then
+
+                                                    local t =
+                                                        (position - 0.32)
+                                                        / 0.16
+
+                                                    r = math.floor(
+                                                        120 * t
+                                                    )
+                                                    g = math.floor(
+                                                        153 + 80 * t
+                                                    )
+                                                    b = 220
+
+                                                elseif position < 0.64 then
+
+                                                    local t =
+                                                        (position - 0.48)
+                                                        / 0.16
+
+                                                    r = math.floor(
+                                                        120 + 135 * t
+                                                    )
+                                                    g = math.floor(
+                                                        233 + 22 * t
+                                                    )
+                                                    b = 255
+
+                                                elseif position < 0.80 then
+
+                                                    local t =
+                                                        (position - 0.64)
+                                                        / 0.16
+
+                                                    r = math.floor(
+                                                        255 - 255 * t
+                                                    )
+                                                    g = math.floor(
+                                                        255 - 180 * t
+                                                    )
+                                                    b = math.floor(
+                                                        255 - 100 * t
+                                                    )
+
+                                                else
+
+                                                    local t =
+                                                        (position - 0.80)
+                                                        / 0.20
+
+                                                    r = 0
+                                                    g = math.floor(
+                                                        75 - 67 * t
+                                                    )
+                                                    b = math.floor(
+                                                        155 - 135 * t
+                                                    )
+                                                end
+
+                                            elseif colour == 2 then
+
+                                                if position < 0.5 then
+
+                                                    local t =
+                                                        position / 0.5
+
+                                                    r = 255
+                                                    g = math.floor(
+                                                        35 + 180 * t
+                                                    )
+                                                    b = math.floor(
+                                                        5 + 20 * t
+                                                    )
+
+                                                else
+
+                                                    local t =
+                                                        (position - 0.5)
+                                                        / 0.5
+
+                                                    r = 255
+                                                    g = math.floor(
+                                                        215 - 180 * t
+                                                    )
+                                                    b = math.floor(
+                                                        25 - 20 * t
+                                                    )
+                                                end
+
+                                            elseif colour == 3 then
+
+                                                local h = position * 6
+
+                                                if h < 1 then
+                                                    r = 255
+                                                    g = math.floor(
+                                                        h * 255
+                                                    )
+                                                    b = 0
+
+                                                elseif h < 2 then
+                                                    r = math.floor(
+                                                        255 - (h - 1) * 255
+                                                    )
+                                                    g = 255
+                                                    b = 0
+
+                                                elseif h < 3 then
+                                                    r = 0
+                                                    g = 255
+                                                    b = math.floor(
+                                                        (h - 2) * 255
+                                                    )
+
+                                                elseif h < 4 then
+                                                    r = 0
+                                                    g = math.floor(
+                                                        255 - (h - 3) * 255
+                                                    )
+                                                    b = 255
+
+                                                elseif h < 5 then
+                                                    r = math.floor(
+                                                        (h - 4) * 255
+                                                    )
+                                                    g = 0
+                                                    b = 255
+
+                                                else
+                                                    r = 255
+                                                    g = 0
+                                                    b = math.floor(
+                                                        255 - (h - 5) * 255
+                                                    )
+                                                end
+
+                                            else
+
+                                                if position < 0.5 then
+
+                                                    local t =
+                                                        position / 0.5
+
+                                                    r = 255
+                                                    g = math.floor(
+                                                        105 + 120 * t
+                                                    )
+                                                    b = math.floor(
+                                                        170 + 70 * t
+                                                    )
+
+                                                else
+
+                                                    local t =
+                                                        (position - 0.5)
+                                                        / 0.5
+
+                                                    r = 255
+                                                    g = math.floor(
+                                                        225 - 100 * t
+                                                    )
+                                                    b = math.floor(
+                                                        240 - 20 * t
+                                                    )
+                                                end
+                                            end
+
+                                            table.insert(
+                                                result,
+                                                string.format(
+                                                    "#c%02x%02x%02x%s",
+                                                    r,
+                                                    g,
+                                                    b,
+                                                    character
+                                                )
+                                            )
+
+                                            letterIndex =
+                                                letterIndex + 1
+                                        end
+                                    end
+
+                                    local timerTextDisplay =
+                                        table.concat(result)
+                                        .. "  "
+                                        .. tostring(currentTimer)
+
+                                    local tdata = {}
+
+                                    tdata[1] = "minitimer2"
+                                    tdata[2] = "showTimerTips"
+                                    tdata[3] = {
+                                        {0},
+                                        1,
+                                        timerTextDisplay,
+                                        true
+                                    }
+
+                                    ScriptSupportTask:reportTaskToHost(
+                                        SSTASKID.HOST_BordCast,
+                                        tdata
+                                    )
+
+                                    if currentTimer <= 0 then
+                                        break
+                                    end
+
+                                    baseHue =
+                                        (baseHue + 0.1) % 1
+
+                                    threadpool:wait(1)
+
+                                    currentTimer =
+                                        currentTimer - 1
+                                end
+
+                                if _G.customTimer_enabled
+                                and generation ==
+                                    _G.customTimer_generation then
+
+                                    _G.customTimer_enabled = false
+
+                                    pcall(function()
+                                        selectedFunction()
+                                    end)
+
+                                end
+
+                            end)
+
+                            ShowGameTipsWithoutFilter(
+                                "#c00FF00Custom timer enabled"
+                            )
+
+                        end)
+                    end)
+                end)
+            end)
         end
-        local tdata = {
-            [1] = "team",
-            [2] = "changePlayerTeam",
-            [3] = { AccountManager:getUin(), value }
-        }
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-    end)
+    )
 end
       
 function zdpf()
@@ -8459,7 +8870,7 @@ function UI:Init()
             { name = "每個自訂文本", func = fsjg },
             { name = "Lưu điểm hồi sinh người chơi", func = bcfhd },
             { name = "Cấp skin cho người chơi", func = gypf },
-            { name = "Đổi đội", func = qhdw },
+            { name = "自訂函數計時器", func = qhdw },
             { name = "Skin tùy chỉnh", func = zdpf },
             { name = "煙火", func = sdsj },
             { name = "Vẽ người chơi", func = hzwj },

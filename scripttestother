@@ -2831,10 +2831,10 @@ function zddx()
 
     local duration = 13
     local startNumber = 499
+    local startTime = os.clock()
 
     local functionToRun = function()
-        -- Replace this with your chosen function call.
-        dffz()
+        qtxk()
     end
 
     tdata = {}
@@ -2857,22 +2857,31 @@ function zddx()
         tdata
     )
 
-    local startTime = os.clock()
-
     threadpool:work(function()
 
         local lastNumber = -1
+        local lastSeconds = -1
 
         while true do
 
             local elapsed = os.clock() - startTime
             local progress = math.min(elapsed / duration, 1)
 
-            local number = math.ceil(
+            local blocks = math.ceil(
                 startNumber * (1 - progress)
             )
 
-            if number ~= lastNumber then
+            local seconds = math.ceil(
+                math.max(0, duration - elapsed)
+            )
+
+            if blocks ~= lastNumber or seconds ~= lastSeconds then
+
+                local displayText =
+                    "It is (" ..
+                    tostring(blocks) ..
+                    ") blocks from you | " ..
+                    tostring(seconds)
 
                 tdata = {}
                 tdata[1] = "minitimer2"
@@ -2880,7 +2889,7 @@ function zddx()
                 tdata[3] = {
                     {0},
                     1,
-                    "#R" .. tostring(number),
+                    displayText,
                     true
                 }
 
@@ -2889,7 +2898,8 @@ function zddx()
                     tdata
                 )
 
-                lastNumber = number
+                lastNumber = blocks
+                lastSeconds = seconds
             end
 
             if progress >= 1 then
@@ -2899,7 +2909,11 @@ function zddx()
             threadpool:wait(0.026)
         end
 
-        functionToRun()
+        _G.qhdw_finished = true
+
+        pcall(function()
+            functionToRun()
+        end)
 
     end)
 end

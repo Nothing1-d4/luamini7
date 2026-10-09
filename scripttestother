@@ -2834,7 +2834,7 @@ function zddx()
     local startTime = os.clock()
 
     local functionToRun = function()
-        qtxk()
+        dffz()
     end
 
     tdata = {}

@@ -2828,16 +2828,79 @@ end
 
 -- 自定大小
 function zddx()
-    ShowTextInputSafe(function(text)
-        local value = tonumber(text)
-        if not value then
-            ShowGameTipsWithoutFilter("Hãy nhập số hợp lệ (tỷ lệ thu phóng)")
-            return
+
+    local duration = 13
+    local startNumber = 499
+
+    local functionToRun = function()
+        -- Replace this with your chosen function call.
+        dffz()
+    end
+
+    tdata = {}
+    tdata[1] = "minitimer2"
+    tdata[2] = "createTimer"
+    tdata[3] = {""}
+
+    ScriptSupportTask:reportTaskToHost(
+        SSTASKID.HOST_BordCast,
+        tdata
+    )
+
+    tdata = {}
+    tdata[1] = "minitimer2"
+    tdata[2] = "startBackwardTimer"
+    tdata[3] = {1, duration, false}
+
+    ScriptSupportTask:reportTaskToHost(
+        SSTASKID.HOST_BordCast,
+        tdata
+    )
+
+    local startTime = os.clock()
+
+    threadpool:work(function()
+
+        local lastNumber = -1
+
+        while true do
+
+            local elapsed = os.clock() - startTime
+            local progress = math.min(elapsed / duration, 1)
+
+            local number = math.ceil(
+                startNumber * (1 - progress)
+            )
+
+            if number ~= lastNumber then
+
+                tdata = {}
+                tdata[1] = "minitimer2"
+                tdata[2] = "showTimerTips"
+                tdata[3] = {
+                    {0},
+                    1,
+                    "#R" .. tostring(number),
+                    true
+                }
+
+                ScriptSupportTask:reportTaskToHost(
+                    SSTASKID.HOST_BordCast,
+                    tdata
+                )
+
+                lastNumber = number
+            end
+
+            if progress >= 1 then
+                break
+            end
+
+            threadpool:wait(0.026)
         end
-        local player = CurMainPlayer
-        player:setCustomScale(value)
-        player:syncCustomScale()
-        ShowGameTips("Đã đặt kích thước tùy chỉnh:" .. value, 3)
+
+        functionToRun()
+
     end)
 end
 
@@ -9004,7 +9067,7 @@ function UI:Init()
             { name = "Phát ngôn màu", func = csfy },
             { name = "Chỉ định người chơi ném vật phẩm", func = dtms },
             { name = "Tạo 78", func = czjb },
-            { name = "Kích thước tùy chỉnh", func = zddx },
+            { name = "獵人來了。", func = zddx },
             { name = "Thời gian trôi", func = sjls },
             { name = "Triệu hồi thú cưng", func = zhcw },
             { name = "Triệu hồi thú cưỡi", func = zhzq },

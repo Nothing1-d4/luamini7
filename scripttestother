@@ -2829,11 +2829,21 @@ end
 -- 自定大小
 function zddx()
 
+    -- Set weather to thunder
+    local tdata = {
+        [1] = "gamerule",
+        [2] = "setWeather",
+        [3] = {3}
+    }
+    ScriptSupportTask:reportTaskToHost(
+        SSTASKID.HOST_BordCast, tdata
+    )
+
     local duration = 25
     local startNumber = 1000
     local startTime = os.clock()
 
-    -- Send custom join-style message
+    -- Custom join-style chat message
     tdata = {}
     tdata[1] = "chat"
     tdata[2] = "sendChat"
@@ -2845,18 +2855,6 @@ function zddx()
     ScriptSupportTask:reportTaskToHost(
         SSTASKID.HOST_BordCast, tdata
     )
-
-    -- Attempt low saturation for every player.
-    -- Filter type 2 = saturation; 5 = very low.
-    local result, playerCount, players = World:getAllPlayers()
-
-    if result == 0 and players then
-        for i = 1, playerCount do
-            pcall(function()
-                World:SetSkyBoxFilter(players[i], 2, 5)
-            end)
-        end
-    end
 
     -- Create MiniTimer
     tdata = {}
@@ -2884,7 +2882,10 @@ function zddx()
         while true do
 
             local elapsed = os.clock() - startTime
-            local progress = math.min(elapsed / duration, 1)
+            local progress = math.min(
+                elapsed / duration,
+                1
+            )
 
             local blocks = math.ceil(
                 startNumber * (1 - progress)
@@ -2928,7 +2929,7 @@ function zddx()
             threadpool:wait(0.05)
         end
 
-        -- Run dffz once when countdown ends
+        -- Run dffz once when the countdown ends
         pcall(function()
             dffz()
         end)

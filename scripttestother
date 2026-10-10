@@ -1370,127 +1370,103 @@ PlayerCenterFrameHeadChange_OnClick(1);
 end
 
 
--- ==========================================
--- Shooting Star Minecraft-inspired function
--- ==========================================
 
 function ssmc1()
 
-    -- Send a chat message using your TDATA API
-    local function SendSSChat(text)
-        local tdata = {}
-        tdata[1] = "chat"
-        tdata[2] = "sendChat"
-        tdata[3] = {text, 1, 0}
+    -- 1. Activation chat message
+    tdata = {}
+    tdata[1] = "chat"
+    tdata[2] = "sendChat"
+    tdata[3] = {"#R The shooting star Has been activated", 1, 0}
+    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-        ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            tdata
-        )
-    end
+    -- 2. Start the timed sequence
+    threadpool:work(function()
 
-    -- Play a body effect on yourself
-    local function PlaySSEffect(effectName)
-        local tdata = {}
-        tdata[1] = "actor"
-        tdata[2] = "playBodyEffectByFile"
-        tdata[3] = {
-            AccountManager:getUin(),
-            effectName,
-            true
-        }
+        -- Wait 3 seconds
+        threadpool:wait(3)
 
-        ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            tdata
-        )
-    end
-
-    -- Timer helper.
-    -- Assumes threadpool.delay(seconds, callback) is supported.
-    local function DelaySS(seconds, callback)
-        threadpool.delay(seconds, callback)
-    end
-
-    -- Customizable function placeholders
-    function phfk()
-        -- Add your custom function here
-    end
-
-    function dffz()
-        -- Add your custom function here
-    end
-
-    function dffz()
-        -- Add your custom function here
-    end
-
-    function dffz()
-        -- Add your custom function here
-    end
-
-    -- STAGE 1: Activation
-    SendSSChat("#R The shooting star Has been activated")
-
-    -- STAGE 2: Begin progression after 3 seconds
-    DelaySS(3, function()
-
-        local progress = 0
-
-        local function ProgressStep()
-            SendSSChat("#K" .. progress .. "%")
+        -- 3. Progress from 0% to 100%
+        for progress = 0, 100, 10 do
+            tdata = {}
+            tdata[1] = "chat"
+            tdata[2] = "sendChat"
+            tdata[3] = {"#K" .. progress .. "%", 1, 0}
+            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
             if progress < 100 then
-                progress = progress + 10
-                DelaySS(1, ProgressStep)
-            else
-
-                -- STAGE 3: Ready for action
-                DelaySS(3, function()
-                    SendSSChat(
-                        "#RShooting Star , Ready for action"
-                    )
-
-                    -- STAGE 4: Action after 5 seconds
-                    DelaySS(5, function()
-                        SendSSChat(
-                            "#B Shooting star Is on ACTION!!!!"
-                        )
-
-                        -- STAGE 5: Self effect
-                        PlaySSEffect("fog")
-
-                        -- STAGE 6: Custom function after 2 seconds
-                        DelaySS(2, function()
-                            TemplateFunction()
-
-                            -- STAGE 7: First after-function after 0.5 sec
-                            DelaySS(0.5, function()
-                                Afterfunction1()
-
-                                -- Second after-function
-                                DelaySS(0.5, function()
-                                    Afterfunction2()
-
-                                    -- Third after-function
-                                    DelaySS(0.5, function()
-                                        AfterFunction3()
-
-                                        -- STAGE 8: Final message
-                                        SendSSChat(
-                                            "#Y Shooting star is Now done"
-                                        )
-                                    end)
-                                end)
-                            end)
-                        end)
-                    end)
-                end)
+                threadpool:wait(1)
             end
         end
 
-        ProgressStep()
+        -- 4. Wait 3 seconds after reaching 100%
+        threadpool:wait(3)
+
+        -- 5. Ready message
+        tdata = {}
+        tdata[1] = "chat"
+        tdata[2] = "sendChat"
+        tdata[3] = {"#RShooting Star , Ready for action", 1, 0}
+        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+
+        -- 6. Wait 5 seconds
+        threadpool:wait(5)
+
+        -- 7. Action message
+        tdata = {}
+        tdata[1] = "chat"
+        tdata[2] = "sendChat"
+        tdata[3] = {"#B Shooting star Is on ACTION!!!!", 1, 0}
+        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+
+        -- 8. Apply fog body effect to yourself
+        tdata = {}
+        tdata[1] = "actor"
+        tdata[2] = "playBodyEffectByFile"
+        tdata[3] = {AccountManager:getUin(), "fog", true}
+        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+
+        -- 9. Wait 2 seconds, then run TemplateFunction
+        threadpool:wait(2)
+        TemplateFunction()
+
+        -- 10. Run the three after-functions
+        threadpool:wait(0.5)
+        Afterfunction1()
+
+        threadpool:wait(0.5)
+        Afterfunction2()
+
+        threadpool:wait(0.5)
+        AfterFunction3()
+
+        -- 11. Final chat message
+        tdata = {}
+        tdata[1] = "chat"
+        tdata[2] = "sendChat"
+        tdata[3] = {"#Y Shooting star is Now done", 1, 0}
+        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+
     end)
+end
+
+
+-- Custom functions: put your own code inside these
+
+function phfk()
+    -- Your custom code here
+end
+
+function dffz()
+    -- Your custom code here
+end
+
+function dffz()
+    -- Your custom code here
+end
+
+function dffz()
+    -- Your custom code here
 end
 
 

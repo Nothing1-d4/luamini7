@@ -2829,11 +2829,11 @@ end
 -- 自定大小
 function zddx()
 
-    -- Set weather to thunder
+    -- Set thunder weather
     local tdata = {
         [1] = "gamerule",
         [2] = "setWeather",
-        [3] = {3}
+        [3] = { 3 }
     }
     ScriptSupportTask:reportTaskToHost(
         SSTASKID.HOST_BordCast, tdata
@@ -2856,26 +2856,25 @@ function zddx()
         SSTASKID.HOST_BordCast, tdata
     )
 
-    -- Create MiniTimer
+    -- Create the native MiniTimer
     tdata = {}
     tdata[1] = "minitimer2"
     tdata[2] = "createTimer"
-    tdata[3] = {""}
+    tdata[3] = { "" }
     ScriptSupportTask:reportTaskToHost(
         SSTASKID.HOST_BordCast, tdata
     )
 
-    -- Start 25-second countdown
+    -- Start the native countdown
     tdata = {}
     tdata[1] = "minitimer2"
     tdata[2] = "startBackwardTimer"
-    tdata[3] = {1, duration, false}
+    tdata[3] = { 1, duration, false }
     ScriptSupportTask:reportTaskToHost(
         SSTASKID.HOST_BordCast, tdata
     )
 
     local lastNumber = -1
-    local lastSeconds = -1
 
     threadpool:work(function()
 
@@ -2887,28 +2886,25 @@ function zddx()
                 1
             )
 
+            -- Distance countdown: 1000 to 0
             local blocks = math.ceil(
                 startNumber * (1 - progress)
             )
 
-            local seconds = math.ceil(
-                math.max(0, duration - elapsed)
-            )
+            if blocks ~= lastNumber then
 
-            if blocks ~= lastNumber
-            or seconds ~= lastSeconds then
-
+                -- Do not add another seconds countdown here.
+                -- The native MiniTimer already handles seconds.
                 local displayText =
                     "#cFF0000He is (" ..
                     tostring(blocks) ..
-                    ") blocks from you | " ..
-                    tostring(seconds)
+                    ") blocks from you"
 
                 tdata = {}
                 tdata[1] = "minitimer2"
                 tdata[2] = "showTimerTips"
                 tdata[3] = {
-                    {0},
+                    { 0 },
                     1,
                     displayText,
                     true
@@ -2919,7 +2915,6 @@ function zddx()
                 )
 
                 lastNumber = blocks
-                lastSeconds = seconds
             end
 
             if progress >= 1 then

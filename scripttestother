@@ -1450,26 +1450,6 @@ function ssmc1()
 end
 
 
--- Custom functions: put your own code inside these
-
-function phfk()
-    -- Your custom code here
-end
-
-function dffz()
-    -- Your custom code here
-end
-
-function dffz()
-    -- Your custom code here
-end
-
-function dffz()
-    -- Your custom code here
-end
-
-
-
 function zxyj()
     local btn = getglobal("AccRideChangeBtn")
     if btn then
@@ -1629,6 +1609,21 @@ function pmwz()
             end
         end
     )
+end
+
+function phfk()
+    local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
+    local gridX, gridY, gridZ = x / 100, y / 100, z / 100
+    
+    local startPos = { x = gridX - 25, y = gridY - 50, z = gridZ - 25 }
+    local endPos = { x = gridX + 24, y = gridY + 49, z = gridZ + 24 }
+    
+    local tdata = {
+        [1] = "area",
+        [2] = "clearAllBlockAreaRange",
+        [3] = { startPos, endPos, 0 }
+    }
+    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 end
 
 function kqqx()

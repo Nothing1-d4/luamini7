@@ -1372,145 +1372,209 @@ end
 
 function ssmc1()
 
-    -- 1. Activation chat message
-    local tdata = {}
-    tdata[1] = "chat"
-    tdata[2] = "sendChat"
-    tdata[3] = {"#R The shooting star Has been activated", 1, 0}
+    -- 1. Activation message
+    local tdata = {
+        [1] = "chat",
+        [2] = "sendChat",
+        [3] = {"#R The shooting star Has been activated", 1, 0}
+    }
     ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-    -- 2. Start the timed sequence
+    -- 2. Change skybox immediately upon activation
+    local skyTdata = {
+        [1] = "world",
+        [2] = "SetSkyBoxMaps",
+        [3] = {1, 30102, ""}
+    }
+    ScriptSupportTask:reportTaskToHost(
+        SSTASKID.HOST_BordCast,
+        skyTdata
+    )
+
+    -- 3. Start the sequence
     threadpool:work(function()
 
-        -- 3. Wait 3 seconds
         threadpool:wait(3)
 
-        -- 4. Progress from 0% to 100%
+        -- 4. Original startup percentage
         for progress = 0, 100, 10 do
-            local tdata = {}
-            tdata[1] = "chat"
-            tdata[2] = "sendChat"
-            tdata[3] = {"#K" .. progress .. "%", 1, 0}
-            ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+            local chatTdata = {
+                [1] = "chat",
+                [2] = "sendChat",
+                [3] = {"#K" .. progress .. "%", 1, 0}
+            }
+            ScriptSupportTask:reportTaskToHost(
+                SSTASKID.HOST_BordCast,
+                chatTdata
+            )
 
             if progress < 100 then
                 threadpool:wait(1)
             end
         end
 
-        -- 5. Wait 3 seconds after reaching 100%
         threadpool:wait(3)
 
-        -- 6. Ready message
-        local tdata = {}
-        tdata[1] = "chat"
-        tdata[2] = "sendChat"
-        tdata[3] = {"#RShooting Star , Ready for action", 1, 0}
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-
-        -- 7. Wait 5 seconds
-        threadpool:wait(5)
-
-        -- 8. Shooting Star action message
-        local tdata = {}
-        tdata[1] = "chat"
-        tdata[2] = "sendChat"
-        tdata[3] = {"#B Shooting star Is on ACTION!!!!", 1, 0}
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-
-        -- 9. Change the skybox to 30102
-        local skyTdata = {
-            [1] = "world",
-            [2] = "SetSkyBoxMaps",
-            [3] = {1, 30102, ""}
+        -- 5. Ready message
+        local readyTdata = {
+            [1] = "chat",
+            [2] = "sendChat",
+            [3] = {"#RShooting Star , Ready for action", 1, 0}
         }
         ScriptSupportTask:reportTaskToHost(
             SSTASKID.HOST_BordCast,
-            skyTdata
+            readyTdata
         )
 
-        -- 10. Apply fog body effect to yourself
-        local effectTdata = {}
-        effectTdata[1] = "actor"
-        effectTdata[2] = "playBodyEffectByFile"
-        effectTdata[3] = {AccountManager:getUin(), "fog", true}
+        threadpool:wait(5)
+
+        -- 6. Shooting Star action message
+        local actionTdata = {
+            [1] = "chat",
+            [2] = "sendChat",
+            [3] = {"#B Shooting star Is on ACTION!!!!", 1, 0}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            actionTdata
+        )
+
+        -- 7. Apply fog body effect
+        local effectTdata = {
+            [1] = "actor",
+            [2] = "playBodyEffectByFile",
+            [3] = {AccountManager:getUin(), "fog", true}
+        }
         ScriptSupportTask:reportTaskToHost(
             SSTASKID.HOST_BordCast,
             effectTdata
         )
 
-        -- 11. Ten-second visual energy bar
+        -- 8. Create the visible timer
+        local createTimerTdata = {
+            [1] = "minitimer2",
+            [2] = "createTimer",
+            [3] = {""}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            createTimerTdata
+        )
+
+        -- 9. Keep the real timer at 0
+        local startTimerTdata = {
+            [1] = "minitimer2",
+            [2] = "startBackwardTimer",
+            [3] = {1, 0, false}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            startTimerTdata
+        )
+
+        -- 10. Ten-second energy bar
         for power = 0, 100, 10 do
             local energy = string.rep("=", power / 10)
             local spaces = string.rep(" ", 10 - power / 10)
-            local bar = "-" .. energy .. spaces .. "- | " .. power
+            local bar = "-" .. energy .. spaces .. "- | "
+                .. power .. " /0"
 
-            ShowGameTipsWithoutFilter("#Y" .. bar)
+            local timerTdata = {
+                [1] = "minitimer2",
+                [2] = "showTimerTips",
+                [3] = {
+                    {0},
+                    1,
+                    bar,
+                    true
+                }
+            }
+            ScriptSupportTask:reportTaskToHost(
+                SSTASKID.HOST_BordCast,
+                timerTdata
+            )
 
             if power < 100 then
                 threadpool:wait(1)
             end
         end
 
-        -- 12. GO message
-        local goTdata = {}
-        goTdata[1] = "chat"
-        goTdata[2] = "sendChat"
-        goTdata[3] = {"#YGO!!!!!!", 1, 0}
+        -- 11. GO message
+        local goTdata = {
+            [1] = "chat",
+            [2] = "sendChat",
+            [3] = {"#YGO!!!!!!", 1, 0}
+        }
         ScriptSupportTask:reportTaskToHost(
             SSTASKID.HOST_BordCast,
             goTdata
         )
 
-        -- 13. Change the energy bar into the gun-barrel display
-        ShowGameTipsWithoutFilter("#Y-%%%%%%%%%%- | 0")
+        -- 12. Change bar to firing state; real timer remains 0
+        local firingTdata = {
+            [1] = "minitimer2",
+            [2] = "showTimerTips",
+            [3] = {
+                {0},
+                1,
+                "-%%%%%%%%%%- | 0 /0",
+                true
+            }
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            firingTdata
+        )
 
-        -- 14. Wait one second before activating PHFK
         threadpool:wait(1)
 
-        -- 15. Run PHFK; after-functions depend on it completing
-        if type(phfk) == "function" then
-            local success = pcall(phfk)
+        -- 13. PHFK operation: clear the area around the player
+        local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
+        local gridX, gridY, gridZ = x / 100, y / 100, z / 100
 
-            if success then
+        local startPos = {
+            x = gridX - 25,
+            y = gridY - 50,
+            z = gridZ - 25
+        }
 
-                -- 16. After-function 1
-                threadpool:wait(0.5)
-                Afterfunction1()
+        local endPos = {
+            x = gridX + 24,
+            y = gridY + 49,
+            z = gridZ + 24
+        }
 
-                -- 17. After-function 2
-                threadpool:wait(0.5)
-                Afterfunction2()
+        local phfkTdata = {
+            [1] = "area",
+            [2] = "clearAllBlockAreaRange",
+            [3] = {startPos, endPos, 0}
+        }
 
-                -- 18. After-function 3
-                threadpool:wait(0.5)
-                AfterFunction3()
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            phfkTdata
+        )
 
-                -- 19. Final chat message
-                local finalTdata = {}
-                finalTdata[1] = "chat"
-                finalTdata[2] = "sendChat"
-                finalTdata[3] = {
-                    "#Y Shooting star is Now done",
-                    1,
-                    0
-                }
-                ScriptSupportTask:reportTaskToHost(
-                    SSTASKID.HOST_BordCast,
-                    finalTdata
-                )
+        -- 14. After-functions, retaining the original waits
+        threadpool:wait(0.5)
+        dffz()
 
-            else
-                ShowGameTipsWithoutFilter(
-                    "#cFF0000PHFK failed; after-functions skipped"
-                )
-            end
+        threadpool:wait(0.5)
+        dffz()
 
-        else
-            ShowGameTipsWithoutFilter(
-                "#cFF0000PHFK function not found; after-functions skipped"
-            )
-        end
+        threadpool:wait(0.5)
+        dffz()
+
+        -- 15. Final message
+        local finalTdata = {
+            [1] = "chat",
+            [2] = "sendChat",
+            [3] = {"#Y Shooting star is Now done", 1, 0}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            finalTdata
+        )
 
     end)
 end

@@ -1369,22 +1369,131 @@ function zdtx()
 PlayerCenterFrameHeadChange_OnClick(1);
 end
 
-function qcwp()
-local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-local new_x, new_y, new_z = x / 100, y / 100, z / 100
 
--- 计算范围：从主体位置到周围1000格（游戏内单位）
-local range = 1000
-local tdata = {
-    [1] = "world",
-    [2] = "despawnItemByBox",
-    [3] = {
-        new_x - range, new_y - range, new_z - range,  -- 最小点
-        new_x + range, new_y + range, new_z + range   -- 最大点
-    }
-}
-ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+-- ==========================================
+-- Shooting Star Minecraft-inspired function
+-- Main function: ssmc1()
+-- ==========================================
+
+function ssmc1()
+
+    -- Send a chat message using your TDATA API
+    local function SendSSChat(text)
+        local tdata = {}
+        tdata[1] = "chat"
+        tdata[2] = "sendChat"
+        tdata[3] = {text, 1, 0}
+
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            tdata
+        )
+    end
+
+    -- Play a body effect on yourself
+    local function PlaySSEffect(effectName)
+        local tdata = {}
+        tdata[1] = "actor"
+        tdata[2] = "playBodyEffectByFile"
+        tdata[3] = {
+            AccountManager:getUin(),
+            effectName,
+            true
+        }
+
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            tdata
+        )
+    end
+
+    -- Timer helper.
+    -- Assumes threadpool.delay(seconds, callback) is supported.
+    local function DelaySS(seconds, callback)
+        threadpool.delay(seconds, callback)
+    end
+
+    -- Customizable function placeholders
+    function TemplateFunction()
+        -- Add your custom function here
+    end
+
+    function Afterfunction1()
+        -- Add your custom function here
+    end
+
+    function Afterfunction2()
+        -- Add your custom function here
+    end
+
+    function AfterFunction3()
+        -- Add your custom function here
+    end
+
+    -- STAGE 1: Activation
+    SendSSChat("#R The shooting star Has been activated")
+
+    -- STAGE 2: Begin progression after 3 seconds
+    DelaySS(3, function()
+
+        local progress = 0
+
+        local function ProgressStep()
+            SendSSChat("#K" .. progress .. "%")
+
+            if progress < 100 then
+                progress = progress + 10
+                DelaySS(1, ProgressStep)
+            else
+
+                -- STAGE 3: Ready for action
+                DelaySS(3, function()
+                    SendSSChat(
+                        "#RShooting Star , Ready for action"
+                    )
+
+                    -- STAGE 4: Action after 5 seconds
+                    DelaySS(5, function()
+                        SendSSChat(
+                            "#B Shooting star Is on ACTION!!!!"
+                        )
+
+                        -- STAGE 5: Self effect
+                        PlaySSEffect("fog")
+
+                        -- STAGE 6: Custom function after 2 seconds
+                        DelaySS(2, function()
+                            TemplateFunction()
+
+                            -- STAGE 7: First after-function after 0.5 sec
+                            DelaySS(0.5, function()
+                                Afterfunction1()
+
+                                -- Second after-function
+                                DelaySS(0.5, function()
+                                    Afterfunction2()
+
+                                    -- Third after-function
+                                    DelaySS(0.5, function()
+                                        AfterFunction3()
+
+                                        -- STAGE 8: Final message
+                                        SendSSChat(
+                                            "#Y Shooting star is Now done"
+                                        )
+                                    end)
+                                end)
+                            end)
+                        end)
+                    end)
+                end)
+            end
+        end
+
+        ProgressStep()
+    end)
 end
+
 
 
 function zxyj()
@@ -9156,7 +9265,7 @@ function UI:Init()
             { name = "Khu vực đấu đơn", func = dtly },
             { name = "Sửa tên màu", func = xgcm },
             { name = "Ảnh đại diện tùy chỉnh", func = zdtx },
-            { name = "Xóa vật phẩm rơi", func = qcwp },
+            { name = "終極,射擊,明星", func = ssmc1 },
             { name = "Tâm ngắm tạo dung nham", func = zxyj },
             { name = "關於海洋顏色變化的文本", func = pmwz },
             { name = "Bật quyền", func = kqqx },

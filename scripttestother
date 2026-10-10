@@ -2829,23 +2829,7 @@ end
 -- 自定大小
 function zddx()
 
-    local duration = 13
-    local startNumber = 499
-    local startTime = os.clock()
-
-    -- Footstep settings
-    local FOOTSTEP_SOUND_ID = 10066
-
-    local SOUND_X = 0
-    local SOUND_Y = 50
-    local SOUND_Z = 0
-
-    local lastNumber = -1
-    local lastSeconds = -1
-    local nextFootstepAt = 0
-    local finalStepPlayed = false
-
-    -- Create MiniTimer
+    -- Custom join-style message
     tdata = {}
     tdata[1] = "minitimer2"
     tdata[2] = "createTimer"
@@ -2854,7 +2838,18 @@ function zddx()
         SSTASKID.HOST_BordCast, tdata
     )
 
-    -- Start the 13-second countdown
+    Chat:sendSystemMsg(
+        "#L#R?????#cFFB96B Joined the room"
+    )
+
+    local duration = 13
+    local startNumber = 499
+    local startTime = os.clock()
+
+    local lastNumber = -1
+    local lastSeconds = -1
+
+    -- Start the countdown
     tdata = {}
     tdata[1] = "minitimer2"
     tdata[2] = "startBackwardTimer"
@@ -2878,7 +2873,6 @@ function zddx()
                 math.max(0, duration - elapsed)
             )
 
-            -- Update timer text
             if blocks ~= lastNumber or seconds ~= lastSeconds then
 
                 local displayText =
@@ -2902,55 +2896,6 @@ function zddx()
 
                 lastNumber = blocks
                 lastSeconds = seconds
-            end
-
-            -- Footsteps become louder, deeper and faster
-            if seconds <= 1 and not finalStepPlayed then
-
-                -- Final loud footstep at 1 second
-                pcall(function()
-                    World:playSoundEffectOnPos(
-                        {
-                            x = SOUND_X,
-                            y = SOUND_Y,
-                            z = SOUND_Z
-                        },
-                        FOOTSTEP_SOUND_ID,
-                        100,
-                        0.45,
-                        false
-                    )
-                end)
-
-                finalStepPlayed = true
-
-            elseif seconds > 1 and elapsed >= nextFootstepAt then
-
-                -- Louder footsteps as the countdown progresses
-                local volume = math.floor(
-                    35 + progress * 65
-                )
-
-                -- Lower pitch as the countdown approaches zero
-                local pitch = 1.10 - progress * 0.55
-
-                pcall(function()
-                    World:playSoundEffectOnPos(
-                        {
-                            x = SOUND_X,
-                            y = SOUND_Y,
-                            z = SOUND_Z
-                        },
-                        FOOTSTEP_SOUND_ID,
-                        volume,
-                        pitch,
-                        false
-                    )
-                end)
-
-                -- Footsteps gradually speed up
-                local interval = 0.60 - progress * 0.40
-                nextFootstepAt = elapsed + interval
             end
 
             if progress >= 1 then

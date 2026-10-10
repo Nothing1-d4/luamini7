@@ -1373,7 +1373,7 @@ end
 function ssmc1()
 
     -- 1. Activation chat message
-    tdata = {}
+    local tdata = {}
     tdata[1] = "chat"
     tdata[2] = "sendChat"
     tdata[3] = {"#R The shooting star Has been activated", 1, 0}
@@ -1382,12 +1382,12 @@ function ssmc1()
     -- 2. Start the timed sequence
     threadpool:work(function()
 
-        -- Wait 3 seconds
+        -- 3. Wait 3 seconds
         threadpool:wait(3)
 
-        -- 3. Progress from 0% to 100%
+        -- 4. Progress from 0% to 100%
         for progress = 0, 100, 10 do
-            tdata = {}
+            local tdata = {}
             tdata[1] = "chat"
             tdata[2] = "sendChat"
             tdata[3] = {"#K" .. progress .. "%", 1, 0}
@@ -1398,53 +1398,119 @@ function ssmc1()
             end
         end
 
-        -- 4. Wait 3 seconds after reaching 100%
+        -- 5. Wait 3 seconds after reaching 100%
         threadpool:wait(3)
 
-        -- 5. Ready message
-        tdata = {}
+        -- 6. Ready message
+        local tdata = {}
         tdata[1] = "chat"
         tdata[2] = "sendChat"
         tdata[3] = {"#RShooting Star , Ready for action", 1, 0}
         ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-        -- 6. Wait 5 seconds
+        -- 7. Wait 5 seconds
         threadpool:wait(5)
 
-        -- 7. Action message
-        tdata = {}
+        -- 8. Shooting Star action message
+        local tdata = {}
         tdata[1] = "chat"
         tdata[2] = "sendChat"
         tdata[3] = {"#B Shooting star Is on ACTION!!!!", 1, 0}
         ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-        -- 8. Apply fog body effect to yourself
-        tdata = {}
-        tdata[1] = "actor"
-        tdata[2] = "playBodyEffectByFile"
-        tdata[3] = {AccountManager:getUin(), "fog", true}
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+        -- 9. Change the skybox to 30102
+        local skyTdata = {
+            [1] = "world",
+            [2] = "SetSkyBoxMaps",
+            [3] = {1, 30102, ""}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            skyTdata
+        )
 
-        -- 9. Wait 2 seconds, then call an existing function
-        threadpool:wait(2)
-        phfk()
+        -- 10. Apply fog body effect to yourself
+        local effectTdata = {}
+        effectTdata[1] = "actor"
+        effectTdata[2] = "playBodyEffectByFile"
+        effectTdata[3] = {AccountManager:getUin(), "fog", true}
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            effectTdata
+        )
 
-        -- 10. Call the next existing functions
-        threadpool:wait(0.5)
-        dffz()
+        -- 11. Ten-second visual energy bar
+        for power = 0, 100, 10 do
+            local energy = string.rep("=", power / 10)
+            local spaces = string.rep(" ", 10 - power / 10)
+            local bar = "-" .. energy .. spaces .. "- | " .. power
 
-        threadpool:wait(0.5)
-        dffz()
+            ShowGameTipsWithoutFilter("#Y" .. bar)
 
-        threadpool:wait(0.5)
-        dffz()
+            if power < 100 then
+                threadpool:wait(1)
+            end
+        end
 
-        -- 11. Final chat message
-        tdata = {}
-        tdata[1] = "chat"
-        tdata[2] = "sendChat"
-        tdata[3] = {"#Y Shooting star is Now done", 1, 0}
-        ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
+        -- 12. GO message
+        local goTdata = {}
+        goTdata[1] = "chat"
+        goTdata[2] = "sendChat"
+        goTdata[3] = {"#YGO!!!!!!", 1, 0}
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast,
+            goTdata
+        )
+
+        -- 13. Change the energy bar into the gun-barrel display
+        ShowGameTipsWithoutFilter("#Y-%%%%%%%%%%- | 0")
+
+        -- 14. Wait one second before activating PHFK
+        threadpool:wait(1)
+
+        -- 15. Run PHFK; after-functions depend on it completing
+        if type(phfk) == "function" then
+            local success = pcall(phfk)
+
+            if success then
+
+                -- 16. After-function 1
+                threadpool:wait(0.5)
+                Afterfunction1()
+
+                -- 17. After-function 2
+                threadpool:wait(0.5)
+                Afterfunction2()
+
+                -- 18. After-function 3
+                threadpool:wait(0.5)
+                AfterFunction3()
+
+                -- 19. Final chat message
+                local finalTdata = {}
+                finalTdata[1] = "chat"
+                finalTdata[2] = "sendChat"
+                finalTdata[3] = {
+                    "#Y Shooting star is Now done",
+                    1,
+                    0
+                }
+                ScriptSupportTask:reportTaskToHost(
+                    SSTASKID.HOST_BordCast,
+                    finalTdata
+                )
+
+            else
+                ShowGameTipsWithoutFilter(
+                    "#cFF0000PHFK failed; after-functions skipped"
+                )
+            end
+
+        else
+            ShowGameTipsWithoutFilter(
+                "#cFF0000PHFK function not found; after-functions skipped"
+            )
+        end
 
     end)
 end
@@ -1611,20 +1677,6 @@ function pmwz()
     )
 end
 
-function phfk()
-    local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
-    local gridX, gridY, gridZ = x / 100, y / 100, z / 100
-    
-    local startPos = { x = gridX - 25, y = gridY - 50, z = gridZ - 25 }
-    local endPos = { x = gridX + 24, y = gridY + 49, z = gridZ + 24 }
-    
-    local tdata = {
-        [1] = "area",
-        [2] = "clearAllBlockAreaRange",
-        [3] = { startPos, endPos, 0 }
-    }
-    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
-end
 
 function kqqx()
 local nameList = { 1, 2, 4, 8, 16,32, 256,512,2048}

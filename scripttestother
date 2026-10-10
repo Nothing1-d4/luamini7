@@ -1372,7 +1372,6 @@ end
 
 -- ==========================================
 -- Shooting Star Minecraft-inspired function
--- Main function: ssmc1()
 -- ==========================================
 
 function ssmc1()
@@ -1414,19 +1413,19 @@ function ssmc1()
     end
 
     -- Customizable function placeholders
-    function TemplateFunction()
+    function phfk()
         -- Add your custom function here
     end
 
-    function Afterfunction1()
+    function dffz()
         -- Add your custom function here
     end
 
-    function Afterfunction2()
+    function dffz()
         -- Add your custom function here
     end
 
-    function AfterFunction3()
+    function dffz()
         -- Add your custom function here
     end
 

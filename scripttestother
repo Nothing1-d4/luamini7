@@ -2829,17 +2829,17 @@ end
 -- 自定大小
 function zddx()
 
-    -- Custom join-style message
+    -- Send custom join-style chat message
     tdata = {}
-    tdata[1] = "minitimer2"
-    tdata[2] = "createTimer"
-    tdata[3] = {""}
+    tdata[1] = "chat"
+    tdata[2] = "sendChat"
+    tdata[3] = {
+        "#L#R?????#cFFB96B Joined the room",
+        1,
+        0
+    }
     ScriptSupportTask:reportTaskToHost(
         SSTASKID.HOST_BordCast, tdata
-    )
-
-    Chat:sendSystemMsg(
-        "#L#R?????#cFFB96B Joined the room"
     )
 
     local duration = 13
@@ -2849,7 +2849,16 @@ function zddx()
     local lastNumber = -1
     local lastSeconds = -1
 
-    -- Start the countdown
+    -- Create MiniTimer
+    tdata = {}
+    tdata[1] = "minitimer2"
+    tdata[2] = "createTimer"
+    tdata[3] = {""}
+    ScriptSupportTask:reportTaskToHost(
+        SSTASKID.HOST_BordCast, tdata
+    )
+
+    -- Start countdown
     tdata = {}
     tdata[1] = "minitimer2"
     tdata[2] = "startBackwardTimer"
@@ -2861,7 +2870,6 @@ function zddx()
     threadpool:work(function()
 
         while true do
-
             local elapsed = os.clock() - startTime
             local progress = math.min(elapsed / duration, 1)
 
@@ -2874,7 +2882,6 @@ function zddx()
             )
 
             if blocks ~= lastNumber or seconds ~= lastSeconds then
-
                 local displayText =
                     "#cFF0000He is (" ..
                     tostring(blocks) ..
@@ -2905,9 +2912,9 @@ function zddx()
             threadpool:wait(0.05)
         end
 
-        -- Call qtxk once when the countdown ends
+        -- Run qtxk once at the end
         pcall(function()
-            dffz()
+            qtxk()
         end)
 
     end)

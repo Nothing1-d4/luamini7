@@ -1370,7 +1370,6 @@ PlayerCenterFrameHeadChange_OnClick(1);
 end
 
 
-
 function ssmc1()
 
     -- 1. Activation chat message
@@ -1426,19 +1425,19 @@ function ssmc1()
         tdata[3] = {AccountManager:getUin(), "fog", true}
         ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-        -- 9. Wait 2 seconds, then run TemplateFunction
+        -- 9. Wait 2 seconds, then call an existing function
         threadpool:wait(2)
-        TemplateFunction()
+        phfk()
 
-        -- 10. Run the three after-functions
+        -- 10. Call the next existing functions
         threadpool:wait(0.5)
-        Afterfunction1()
-
-        threadpool:wait(0.5)
-        Afterfunction2()
+        dffz()
 
         threadpool:wait(0.5)
-        AfterFunction3()
+        dffz()
+
+        threadpool:wait(0.5)
+        dffz()
 
         -- 11. Final chat message
         tdata = {}

@@ -6351,6 +6351,7 @@ function gbtq()
     end
 end
 
+
 function fosgm()
 
     GetInst("MessageBoxInterface"):dualBtnBox(
@@ -6382,9 +6383,13 @@ function fosgm()
                     30009, 30010, 30011, 30012
                 }
 
+                -- SKYBOX: START SLOW, GRADUALLY ACCELERATE
                 threadpool:work(function()
 
                     local index = 1
+                    local delay = 0.5
+                    local minimumDelay = 0.07
+                    local acceleration = 0.005
 
                     while _G.fosgm_enabled do
 
@@ -6409,10 +6414,16 @@ function fosgm()
                             index = 1
                         end
 
-                        threadpool:wait(0.07)
+                        threadpool:wait(delay)
+
+                        delay = math.max(
+                            minimumDelay,
+                            delay - acceleration
+                        )
                     end
                 end)
 
+                -- RAINBOW TIMER: GENERATE ONCE, BROADCAST ONCE
                 threadpool:work(function()
 
                     threadpool:wait(10)
@@ -6422,9 +6433,70 @@ function fosgm()
                     end
 
                     local text = "APOCALYPSE HAS STARTED!"
-                    local baseHue = 0
+                    local characters = {}
+                    local result = {}
+                    local letterIndex = 0
 
-                    local tdata = {
+                    for character in string.gmatch(
+                        text,
+                        "[%z\1-\127\194-\244][\128-\191]*"
+                    ) do
+                        table.insert(characters, character)
+                    end
+
+                    for _, character in ipairs(characters) do
+
+                        if character == " " or character == "\n" then
+                            table.insert(result, character)
+
+                        else
+                            local hue = (letterIndex * 0.08) % 1
+                            local sector = math.floor(hue * 6)
+                            local fraction = hue * 6 - sector
+
+                            local q = 1 - fraction
+                            local t = fraction
+
+                            sector = sector % 6
+
+                            local red, green, blue
+
+                            if sector == 0 then
+                                red, green, blue = 1, t, 0
+                            elseif sector == 1 then
+                                red, green, blue = q, 1, 0
+                            elseif sector == 2 then
+                                red, green, blue = 0, 1, t
+                            elseif sector == 3 then
+                                red, green, blue = 0, q, 1
+                            elseif sector == 4 then
+                                red, green, blue = t, 0, 1
+                            else
+                                red, green, blue = 1, 0, q
+                            end
+
+                            red = math.floor(red * 255 + 0.5)
+                            green = math.floor(green * 255 + 0.5)
+                            blue = math.floor(blue * 255 + 0.5)
+
+                            table.insert(
+                                result,
+                                string.format(
+                                    "#c%02X%02X%02X%s",
+                                    red,
+                                    green,
+                                    blue,
+                                    character
+                                )
+                            )
+
+                            letterIndex = letterIndex + 1
+                        end
+                    end
+
+                    local rainbowText = table.concat(result)
+
+                    local createTimerData = {
                         [1] = "minitimer2",
                         [2] = "createTimer",
                         [3] = {""}
@@ -6432,102 +6504,27 @@ function fosgm()
 
                     ScriptSupportTask:reportTaskToHost(
                         SSTASKID.HOST_BordCast,
-                        tdata
+                        createTimerData
                     )
 
-                    while _G.fosgm_enabled do
-
-                        local characters = {}
-
-                        for character in string.gmatch(
-                            text,
-                            "[%z\1-\127\194-\244][\128-\191]*"
-                        ) do
-                            table.insert(characters, character)
-                        end
-
-                        local result = {}
-                        local letterIndex = 0
-
-                        for _, character in ipairs(characters) do
-
-                            if character == " "
-                            or character == "\n" then
-
-                                table.insert(result, character)
-
-                            else
-
-                                local hue =
-                                    (baseHue + letterIndex * 0.08) % 1
-
-                                local sector = math.floor(hue * 6)
-                                local fraction = hue * 6 - sector
-
-                                local q = 1 - fraction
-                                local t = fraction
-
-                                sector = sector % 6
-
-                                local red, green, blue
-
-                                if sector == 0 then
-                                    red, green, blue = 1, t, 0
-                                elseif sector == 1 then
-                                    red, green, blue = q, 1, 0
-                                elseif sector == 2 then
-                                    red, green, blue = 0, 1, t
-                                elseif sector == 3 then
-                                    red, green, blue = 0, q, 1
-                                elseif sector == 4 then
-                                    red, green, blue = t, 0, 1
-                                else
-                                    red, green, blue = 1, 0, q
-                                end
-
-                                red = math.floor(red * 255 + 0.5)
-                                green = math.floor(green * 255 + 0.5)
-                                blue = math.floor(blue * 255 + 0.5)
-
-                                table.insert(
-                                    result,
-                                    string.format(
-                                        "#c%02X%02X%02X%s",
-                                        red,
-                                        green,
-                                        blue,
-                                        character
-                                    )
-                                )
-
-                                letterIndex = letterIndex + 1
-                            end
-                        end
-
-                        local rainbowText = table.concat(result)
-
-                        tdata = {
-                            [1] = "minitimer2",
-                            [2] = "showTimerTips",
-                            [3] = {
-                                {0},
-                                1,
-                                rainbowText,
-                                true
-                            }
+                    local showTimerData = {
+                        [1] = "minitimer2",
+                        [2] = "showTimerTips",
+                        [3] = {
+                            {0},
+                            1,
+                            rainbowText,
+                            true
                         }
+                    }
 
-                        ScriptSupportTask:reportTaskToHost(
-                            SSTASKID.HOST_BordCast,
-                            tdata
-                        )
-
-                        baseHue = (baseHue + 0.02) % 1
-
-                        threadpool:wait(0.07)
-                    end
+                    ScriptSupportTask:reportTaskToHost(
+                        SSTASKID.HOST_BordCast,
+                        showTimerData
+                    )
                 end)
 
+                -- FOG EFFECT AND EXISTING FUNCTION
                 threadpool:work(function()
 
                     threadpool:wait(15)
@@ -6553,16 +6550,17 @@ function fosgm()
 
                     while _G.fosgm_enabled do
 
-                        if type(dffz1) == "function" then
+                        if type(dffz) == "function" then
                             pcall(function()
-                                dffz1()
+                                dffz()
                             end)
                         end
 
-                        threadpool:wait(0.01)
+                        threadpool:wait(0.005)
                     end
                 end)
 
+                -- PROJECTILE BURSTS: KEEP 0.5-SECOND INTERVAL
                 threadpool:work(function()
 
                     threadpool:wait(15)
@@ -6590,11 +6588,8 @@ function fosgm()
                                     break
                                 end
 
-                                local angle =
-                                    math.rad(i * 45)
-
-                                local distance =
-                                    math.random(50, 100)
+                                local angle = math.rad(i * 45)
+                                local distance = math.random(50, 100)
 
                                 local tx =
                                     cx + math.cos(angle) * distance
@@ -6635,6 +6630,7 @@ function fosgm()
         end
     )
 end
+
    
 function cggj()
     if ClientCurGame:isInGame() then

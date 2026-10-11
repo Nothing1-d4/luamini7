@@ -6351,164 +6351,211 @@ function gbtq()
     end
 end
 
-
-
--- FOSGM - Final Overstrike: God Mode
-
 function fosgm()
+
     GetInst("MessageBoxInterface"):dualBtnBox(
         "Start or stop this?",
         "FOSGM - Final Overstrike: God Mode",
         nil,
         function(userData, btnType)
 
-            -- CANCEL: stop all FOSGM loops.
             if btnType == 0 then
+                _G.fosgm_enabled = false
+                _G.fosgm_started = false
+                ShowGameTipsWithoutFilter("#cFF0000FOSGM STOPPED")
+
+            elseif btnType == 1 then
+
                 if _G.fosgm_enabled then
-                    _G.fosgm_enabled = false
-                    _G.fosgm_started = false
-
-                    ShowGameTipsWithoutFilter(
-                        "#RApocalypse stopped", 3
-                    )
+                    return
                 end
-                return
-            end
 
-            -- CONFIRM: start FOSGM.
-            if btnType ~= 1 then
-                return
-            end
+                _G.fosgm_enabled = true
+                _G.fosgm_started = true
 
-            if _G.fosgm_enabled then
                 ShowGameTipsWithoutFilter(
-                    "#YApocalypse is already running", 3
+                    "#b#RAPOCALYPSE HAS STARTED !!!"
                 )
-                return
-            end
-
-            _G.fosgm_enabled = true
-            _G.fosgm_started = false
-
-            ShowGameTipsWithoutFilter(
-                "#b#RAPOCALPYSE HAS STARTED !!!", 3
-            )
-
-            --------------------------------------------------
-            -- SKYBOX: accelerate over 10 seconds, then
-            -- continue cycling every 0.07 seconds.
-            --------------------------------------------------
-            threadpool:work(function()
-                local startTime = os.clock()
-                local index = 0
 
                 local skyboxIds = {
                     30005, 30006, 30007, 30008,
                     30009, 30010, 30011, 30012
                 }
 
-                while _G.fosgm_enabled do
-                    local elapsed = os.clock() - startTime
-                    local delay
+                threadpool:work(function()
 
-                    if elapsed < 7 then
-                        delay = 0.35 - (elapsed / 7) * 0.25
-                    elseif elapsed < 10 then
-                        delay = 0.10 - ((elapsed - 7) / 3) * 0.03
-                    else
-                        delay = 0.07
-                    end
+                    local index = 1
 
-                    if delay < 0.07 then
-                        delay = 0.07
-                    end
+                    while _G.fosgm_enabled do
 
-                    index = (index % #skyboxIds) + 1
+                        local tdata = {
+                            [1] = "world",
+                            [2] = "SetSkyBoxMaps",
+                            [3] = {
+                                1,
+                                skyboxIds[index],
+                                ""
+                            }
+                        }
 
-                    local skyTdata = {
-                        [1] = "world",
-                        [2] = "SetSkyBoxMaps",
-                        [3] = {1, skyboxIds[index], ""}
-                    }
-
-                    pcall(function()
                         ScriptSupportTask:reportTaskToHost(
-                            SSTASKID.HOST_BordCast, skyTdata
-                        )
-                    end)
-
-                    threadpool:wait(delay)
-                end
-            end)
-
-            --------------------------------------------------
-            -- AT 10 SECONDS: start rainbow text.
-            -- Skybox cycling continues independently.
-            --------------------------------------------------
-            threadpool:work(function()
-                threadpool:wait(10)
-
-                if not _G.fosgm_enabled then
-                    return
-                end
-
-                _G.fosgm_started = true
-
-                -- RAINBOW TEXT: change color every 0.05 seconds.
-                threadpool:work(function()
-                    local colors = {
-                        "#R", "#Y", "#G", "#B",
-                        "#cFF00FF", "#c00FFFF"
-                    }
-
-                    local colorIndex = 1
-
-                    while _G.fosgm_enabled do
-                        ShowGameTipsWithoutFilter(
-                            colors[colorIndex] ..
-                            "APOCALPYSE HAS STARTED !!!",
-                            3
+                            SSTASKID.HOST_BordCast,
+                            tdata
                         )
 
-                        colorIndex = (colorIndex % #colors) + 1
-                        threadpool:wait(0.05)
+                        index = index + 1
+
+                        if index > #skyboxIds then
+                            index = 1
+                        end
+
+                        threadpool:wait(0.07)
                     end
                 end)
 
-                --------------------------------------------------
-                -- AT 15 SECONDS: activate fog and begin effects.
-                --------------------------------------------------
-                threadpool:wait(5)
+                threadpool:work(function()
 
-                if not _G.fosgm_enabled then
-                    return
-                end
+                    threadpool:wait(10)
 
-                local fogTdata = {
-                    [1] = "actor",
-                    [2] = "playBodyEffectByFile",
-                    [3] = {
-                        AccountManager:getUin(),
-                        "fog",
-                        true
+                    if not _G.fosgm_enabled then
+                        return
+                    end
+
+                    local text = "APOCALYPSE HAS STARTED!"
+                    local baseHue = 0
+
+                    local tdata = {
+                        [1] = "minitimer2",
+                        [2] = "createTimer",
+                        [3] = {""}
                     }
-                }
 
-                pcall(function()
                     ScriptSupportTask:reportTaskToHost(
-                        SSTASKID.HOST_BordCast, fogTdata
+                        SSTASKID.HOST_BordCast,
+                        tdata
                     )
+
+                    while _G.fosgm_enabled do
+
+                        local characters = {}
+
+                        for character in string.gmatch(
+                            text,
+                            "[%z\1-\127\194-\244][\128-\191]*"
+                        ) do
+                            table.insert(characters, character)
+                        end
+
+                        local result = {}
+                        local letterIndex = 0
+
+                        for _, character in ipairs(characters) do
+
+                            if character == " "
+                            or character == "\n" then
+
+                                table.insert(result, character)
+
+                            else
+
+                                local hue =
+                                    (baseHue + letterIndex * 0.08) % 1
+
+                                local sector = math.floor(hue * 6)
+                                local fraction = hue * 6 - sector
+
+                                local q = 1 - fraction
+                                local t = fraction
+
+                                sector = sector % 6
+
+                                local red, green, blue
+
+                                if sector == 0 then
+                                    red, green, blue = 1, t, 0
+                                elseif sector == 1 then
+                                    red, green, blue = q, 1, 0
+                                elseif sector == 2 then
+                                    red, green, blue = 0, 1, t
+                                elseif sector == 3 then
+                                    red, green, blue = 0, q, 1
+                                elseif sector == 4 then
+                                    red, green, blue = t, 0, 1
+                                else
+                                    red, green, blue = 1, 0, q
+                                end
+
+                                red = math.floor(red * 255 + 0.5)
+                                green = math.floor(green * 255 + 0.5)
+                                blue = math.floor(blue * 255 + 0.5)
+
+                                table.insert(
+                                    result,
+                                    string.format(
+                                        "#c%02X%02X%02X%s",
+                                        red,
+                                        green,
+                                        blue,
+                                        character
+                                    )
+                                )
+
+                                letterIndex = letterIndex + 1
+                            end
+                        end
+
+                        local rainbowText = table.concat(result)
+
+                        tdata = {
+                            [1] = "minitimer2",
+                            [2] = "showTimerTips",
+                            [3] = {
+                                {0},
+                                1,
+                                rainbowText,
+                                true
+                            }
+                        }
+
+                        ScriptSupportTask:reportTaskToHost(
+                            SSTASKID.HOST_BordCast,
+                            tdata
+                        )
+
+                        baseHue = (baseHue + 0.02) % 1
+
+                        threadpool:wait(0.07)
+                    end
                 end)
 
-                --------------------------------------------------
-                -- EXISTING ef1(): CALL ONLY; DO NOT REDEFINE.
-                -- Repeats with a 0.01-second wait.
-                --------------------------------------------------
                 threadpool:work(function()
+
+                    threadpool:wait(15)
+
+                    if not _G.fosgm_enabled then
+                        return
+                    end
+
+                    local fogTdata = {
+                        [1] = "actor",
+                        [2] = "playBodyEffectByFile",
+                        [3] = {
+                            AccountManager:getUin(),
+                            "fog",
+                            true
+                        }
+                    }
+
+                    ScriptSupportTask:reportTaskToHost(
+                        SSTASKID.HOST_BordCast,
+                        fogTdata
+                    )
+
                     while _G.fosgm_enabled do
-                        if type(dffz) == "function" then
+
+                        if type(dffz1) == "function" then
                             pcall(function()
-                                dffz()
+                                dffz1()
                             end)
                         end
 
@@ -6516,32 +6563,44 @@ function fosgm()
                     end
                 end)
 
-                --------------------------------------------------
-                -- PROJECTILES: fixed ID 15056.
-                -- Eight projectiles every 0.5 seconds.
-                --------------------------------------------------
                 threadpool:work(function()
+
+                    threadpool:wait(15)
+
+                    if not _G.fosgm_enabled then
+                        return
+                    end
+
                     while _G.fosgm_enabled do
-                        if CurMainPlayer then
-                            local x, y, z =
-                                CurMainPlayer:getPosition(0, 0, 0)
 
-                            local cx = x / 100
-                            local cy = y / 100
-                            local cz = z / 100
+                        local player = CurMainPlayer
 
-                            for angle = 0, 315, 45 do
+                        if player then
+
+                            local px, py, pz =
+                                player:getPosition(0, 0, 0)
+
+                            local cx = px / 100
+                            local cy = py / 100
+                            local cz = pz / 100
+
+                            for i = 0, 7 do
+
                                 if not _G.fosgm_enabled then
                                     break
                                 end
 
-                                local rad = math.rad(angle)
-                                local distance = math.random(50, 100)
+                                local angle =
+                                    math.rad(i * 45)
+
+                                local distance =
+                                    math.random(50, 100)
 
                                 local tx =
-                                    cx + math.cos(rad) * distance
+                                    cx + math.cos(angle) * distance
+
                                 local tz =
-                                    cz + math.sin(rad) * distance
+                                    cz + math.sin(angle) * distance
 
                                 local projectileTdata = {
                                     [1] = "world",
@@ -6549,32 +6608,33 @@ function fosgm()
                                     [3] = {
                                         AccountManager:getUin(),
                                         15056,
-                                        cx, cy + 2, cz,
-                                        tx, cy, tz,
+                                        cx,
+                                        cy + 2,
+                                        cz,
+                                        tx,
+                                        cy,
+                                        tz,
                                         500
                                     }
                                 }
 
-                                pcall(function()
-                                    ScriptSupportTask:reportTaskToHost(
-                                        SSTASKID.HOST_BordCast,
-                                        projectileTdata
-                                    )
-                                end)
+                                ScriptSupportTask:reportTaskToHost(
+                                    SSTASKID.HOST_BordCast,
+                                    projectileTdata
+                                )
+
+                                threadpool:wait(0.5)
                             end
                         end
 
-                        threadpool:wait(0.5)
+                        threadpool:wait(0.01)
                     end
                 end)
-            end)
+
+            end
         end
     )
 end
-
-
-
-   
    
 function cggj()
     if ClientCurGame:isInGame() then

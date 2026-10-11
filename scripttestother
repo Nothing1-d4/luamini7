@@ -6556,7 +6556,7 @@ function fosgm()
                             end)
                         end
 
-                        threadpool:wait(0.005)
+                        threadpool:wait(0.0001)
                     end
                 end)
 

@@ -1370,6 +1370,8 @@ PlayerCenterFrameHeadChange_OnClick(1);
 end
 
 
+
+
 function ssmc1()
 
     -- 1. Activation message
@@ -1380,23 +1382,19 @@ function ssmc1()
     }
     ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, tdata)
 
-    -- 2. Change skybox immediately upon activation
+    -- 2. Change skybox immediately on activation
     local skyTdata = {
         [1] = "world",
         [2] = "SetSkyBoxMaps",
         [3] = {1, 30102, ""}
     }
-    ScriptSupportTask:reportTaskToHost(
-        SSTASKID.HOST_BordCast,
-        skyTdata
-    )
+    ScriptSupportTask:reportTaskToHost(SSTASKID.HOST_BordCast, skyTdata)
 
-    -- 3. Start the sequence
     threadpool:work(function()
 
+        -- 3. Initial progress sequence
         threadpool:wait(3)
 
-        -- 4. Original startup percentage
         for progress = 0, 100, 10 do
             local chatTdata = {
                 [1] = "chat",
@@ -1404,8 +1402,7 @@ function ssmc1()
                 [3] = {"#K" .. progress .. "%", 1, 0}
             }
             ScriptSupportTask:reportTaskToHost(
-                SSTASKID.HOST_BordCast,
-                chatTdata
+                SSTASKID.HOST_BordCast, chatTdata
             )
 
             if progress < 100 then
@@ -1415,83 +1412,61 @@ function ssmc1()
 
         threadpool:wait(3)
 
-        -- 5. Ready message
+        -- 4. Ready message
         local readyTdata = {
             [1] = "chat",
             [2] = "sendChat",
             [3] = {"#RShooting Star , Ready for action", 1, 0}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            readyTdata
+            SSTASKID.HOST_BordCast, readyTdata
         )
 
         threadpool:wait(5)
 
-        -- 6. Shooting Star action message
+        -- 5. Shooting Star action message
         local actionTdata = {
             [1] = "chat",
             [2] = "sendChat",
             [3] = {"#B Shooting star Is on ACTION!!!!", 1, 0}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            actionTdata
+            SSTASKID.HOST_BordCast, actionTdata
         )
 
-        -- 7. Apply fog body effect
-        local effectTdata = {
-            [1] = "actor",
-            [2] = "playBodyEffectByFile",
-            [3] = {AccountManager:getUin(), "fog", true}
-        }
-        ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            effectTdata
-        )
-
-        -- 8. Create the visible timer
+        -- 6. Create visible timer
         local createTimerTdata = {
             [1] = "minitimer2",
             [2] = "createTimer",
             [3] = {""}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            createTimerTdata
+            SSTASKID.HOST_BordCast, createTimerTdata
         )
 
-        -- 9. Keep the real timer at 0
+        -- 7. Keep real timer at zero
         local startTimerTdata = {
             [1] = "minitimer2",
             [2] = "startBackwardTimer",
             [3] = {1, 0, false}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            startTimerTdata
+            SSTASKID.HOST_BordCast, startTimerTdata
         )
 
-        -- 10. Ten-second energy bar
+        -- 8. Ten-second yellow power bar
         for power = 0, 100, 10 do
             local energy = string.rep("=", power / 10)
             local spaces = string.rep(" ", 10 - power / 10)
-            local bar = "-" .. energy .. spaces .. "- | "
-                .. power .. " /0"
+            local bar = "-" .. energy .. spaces .. "- | " .. power .. " /0"
 
             local timerTdata = {
                 [1] = "minitimer2",
                 [2] = "showTimerTips",
-                [3] = {
-                    {0},
-                    1,
-                    bar,
-                    true
-                }
+                [3] = {{0}, 1, "#Y" .. bar, true}
             }
             ScriptSupportTask:reportTaskToHost(
-                SSTASKID.HOST_BordCast,
-                timerTdata
+                SSTASKID.HOST_BordCast, timerTdata
             )
 
             if power < 100 then
@@ -1499,49 +1474,53 @@ function ssmc1()
             end
         end
 
-        -- 11. GO message
+        -- 9. GO message
         local goTdata = {
             [1] = "chat",
             [2] = "sendChat",
             [3] = {"#YGO!!!!!!", 1, 0}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            goTdata
+            SSTASKID.HOST_BordCast, goTdata
         )
 
-        -- 12. Change bar to firing state; real timer remains 0
+        -- 10. Change bar to firing state
         local firingTdata = {
             [1] = "minitimer2",
             [2] = "showTimerTips",
-            [3] = {
-                {0},
-                1,
-                "-%%%%%%%%%%- | 0 /0",
-                true
-            }
+            [3] = {{0}, 1, "#Y-%%%%%%%%%%- | 0 /0", true}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            firingTdata
+            SSTASKID.HOST_BordCast, firingTdata
+        )
+
+        -- 11. Start lowercase fog effect during the functions
+        local effectTdata = {
+            [1] = "actor",
+            [2] = "playBodyEffectByFile",
+            [3] = {AccountManager:getUin(), "fog", true}
+        }
+        ScriptSupportTask:reportTaskToHost(
+            SSTASKID.HOST_BordCast, effectTdata
         )
 
         threadpool:wait(1)
 
-        -- 13. PHFK operation: clear the area around the player
+        -- 12. PHFK: use offsets of 100, 200, 100
+        -- in both directions from the player's grid position
         local x, y, z = CurMainPlayer:getPosition(0, 0, 0)
         local gridX, gridY, gridZ = x / 100, y / 100, z / 100
 
         local startPos = {
-            x = gridX - 25,
-            y = gridY - 50,
-            z = gridZ - 25
+            x = gridX - 100,
+            y = gridY - 200,
+            z = gridZ - 100
         }
 
         local endPos = {
-            x = gridX + 24,
-            y = gridY + 49,
-            z = gridZ + 24
+            x = gridX + 100,
+            y = gridY + 200,
+            z = gridZ + 100
         }
 
         local phfkTdata = {
@@ -1551,11 +1530,10 @@ function ssmc1()
         }
 
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            phfkTdata
+            SSTASKID.HOST_BordCast, phfkTdata
         )
 
-        -- 14. After-functions, retaining the original waits
+        -- 13. After-functions; preserve the original waits
         threadpool:wait(0.5)
         dffz()
 
@@ -1565,19 +1543,19 @@ function ssmc1()
         threadpool:wait(0.5)
         dffz()
 
-        -- 15. Final message
+        -- 14. Final message
         local finalTdata = {
             [1] = "chat",
             [2] = "sendChat",
             [3] = {"#Y Shooting star is Now done", 1, 0}
         }
         ScriptSupportTask:reportTaskToHost(
-            SSTASKID.HOST_BordCast,
-            finalTdata
+            SSTASKID.HOST_BordCast, finalTdata
         )
 
     end)
 end
+
 
 
 function zxyj()
